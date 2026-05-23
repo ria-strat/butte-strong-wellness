@@ -2,6 +2,19 @@ import { useEffect, useRef } from 'react'
 
 const ACCENT = '#1A8A72'
 
+const PhoneIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.25h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.81a16 16 0 0 0 6.29 6.29l1.88-1.88a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+  </svg>
+)
+
+const EmailIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="20" height="16" x="2" y="4" rx="2" />
+    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+  </svg>
+)
+
 function useReveal(delay = 0) {
   const ref = useRef(null)
   useEffect(() => {
@@ -76,6 +89,57 @@ const RESOURCES = [
     cta: null,
   },
 ]
+
+function ContactCard({ name, role, phone, email, index }) {
+  const ref = useReveal(index * 70)
+  const initials = name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase()
+
+  return (
+    <div
+      ref={ref}
+      className="rounded-2xl bg-white overflow-hidden"
+      style={{ boxShadow: '0 2px 16px rgba(11,31,74,0.07)' }}
+    >
+      <div className="flex">
+        <div className="w-[3px] shrink-0 rounded-l-2xl" style={{ backgroundColor: ACCENT }} />
+        <div className="flex-1 min-w-0 p-4">
+          <div className="flex items-start gap-3">
+            <div
+              className="w-12 h-12 rounded-xl shrink-0 flex items-center justify-center font-display text-lg"
+              style={{ backgroundColor: `${ACCENT}18`, color: ACCENT }}
+            >
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-sans font-semibold text-navy text-[15px] leading-snug">{name}</p>
+              <p className="font-sans text-[11px] text-navy/40 mt-0.5">{role}</p>
+              <div className="flex flex-col gap-1.5 mt-2">
+                {phone && (
+                  <a
+                    href={`tel:${phone}`}
+                    className="flex items-center gap-1.5 font-sans text-[12px] font-medium"
+                    style={{ color: ACCENT, minHeight: '28px' }}
+                  >
+                    <PhoneIcon />{phone}
+                  </a>
+                )}
+                {email && (
+                  <a
+                    href={`mailto:${email}`}
+                    className="flex items-center gap-1.5 font-sans text-[12px] font-medium truncate"
+                    style={{ color: ACCENT, minHeight: '28px' }}
+                  >
+                    <EmailIcon /><span className="truncate">{email}</span>
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function ResourceCard({ resource, index }) {
   const ref = useReveal(index * 70)
@@ -159,6 +223,20 @@ export default function FamilyResources() {
         {RESOURCES.map((r, i) => (
           <ResourceCard key={r.id} resource={r} index={i} />
         ))}
+
+        {/* Point of contact */}
+        <div className="flex items-center gap-3 px-1 mt-2">
+          <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-navy/30 font-semibold whitespace-nowrap">Point of Contact</span>
+          <div className="flex-1 h-px" style={{ background: 'rgba(11,31,74,0.07)' }} />
+        </div>
+
+        <ContactCard
+          name="Mandy Barrow"
+          role="Family Engagement Specialist"
+          phone="530-898-7107"
+          email="mbarrow@buttecounty.net"
+          index={RESOURCES.length}
+        />
       </div>
     </div>
   )
