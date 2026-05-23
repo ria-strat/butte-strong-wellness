@@ -233,8 +233,8 @@ export default function FamilyResources() {
         <ContactCard
           name="Mandy Barrow"
           role="Family Engagement Specialist"
-          phone="530-898-7107"
-          email="mbarrow@buttecounty.net"
+          phone="(949) 338-4553"
+          email="mandyjoybarrow@yahoo.com"
           index={RESOURCES.length}
         />
       </div>
