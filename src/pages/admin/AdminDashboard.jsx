@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
@@ -58,6 +58,79 @@ function Badge({ label, color = '#C9A84C' }) {
     <span className="rounded-full px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wide" style={{ backgroundColor: `${color}18`, color }}>
       {label}
     </span>
+  )
+}
+
+// ── Photo upload ─────────────────────────────────────────────────────────────
+function PhotoUpload({ label = 'Photo', value, onChange, bucket = 'photos' }) {
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState(null)
+  const inputRef = useRef(null)
+
+  async function handleFile(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setError(null)
+    setUploading(true)
+
+    const ext  = file.name.split('.').pop()
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+    const { error: uploadErr } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
+    if (uploadErr) { setError('Upload failed. Try again.'); setUploading(false); return }
+
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path)
+    onChange(data.publicUrl)
+    setUploading(false)
+    // reset so same file can be re-selected if needed
+    e.target.value = ''
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="font-sans text-[10px] uppercase tracking-[0.15em] text-navy/40 font-semibold">{label}</label>
+
+      {/* Preview */}
+      {value && (
+        <div className="relative rounded-xl overflow-hidden" style={{ border: '1px solid rgba(11,31,74,0.1)' }}>
+          <img src={value} alt="Preview" className="w-full h-36 object-cover" onError={e => { e.target.parentElement.style.display = 'none' }} />
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/50 text-white flex items-center justify-center text-xs font-bold cursor-pointer"
+            title="Remove photo"
+          >✕</button>
+        </div>
+      )}
+
+      {/* Upload button */}
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-sans text-[12px] font-semibold cursor-pointer disabled:opacity-50"
+        style={{ border: '1px dashed rgba(11,31,74,0.2)', backgroundColor: 'rgba(11,31,74,0.02)', color: 'rgba(11,31,74,0.5)' }}
+      >
+        {uploading ? (
+          <>
+            <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+            </svg>
+            Uploading…
+          </>
+        ) : (
+          <>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            {value ? 'Replace Photo' : 'Upload Photo'}
+          </>
+        )}
+      </button>
+      {error && <p className="font-sans text-[11px] text-red-500">{error}</p>}
+    </div>
   )
 }
 
@@ -129,6 +202,7 @@ function MemberForm({ form, setForm, onSave, onCancel, saving }) {
       <Field label="Bio" value={form.bio || ''} onChange={f('bio')} as="textarea" />
       <Field label="Areas of Experience" value={form.experience || ''} onChange={f('experience')} as="textarea" />
       <Field label="Sort Order" value={String(form.sort_order ?? 0)} onChange={v => f('sort_order')(parseInt(v) || 0)} type="number" />
+      <PhotoUpload label="Member Photo" value={form.photo_url || ''} onChange={f('photo_url')} />
       <div className="flex gap-4">
         <Checkbox label="Is Chaplain" checked={!!form.is_chaplain} onChange={f('is_chaplain')} />
         <Checkbox label="Active" checked={!!form.is_active} onChange={f('is_active')} />
@@ -151,12 +225,7 @@ function EventForm({ form, setForm, onSave, onCancel, saving }) {
       <Field label="Location" value={form.location || ''} onChange={f('location')} />
       <Field label="Description" value={form.description || ''} onChange={f('description')} as="textarea" />
       <Field label="Registration URL" value={form.registration_url || ''} onChange={f('registration_url')} type="url" placeholder="https://…" />
-      <Field label="Cover Photo URL" value={form.cover_image_url || ''} onChange={f('cover_image_url')} type="url" placeholder="https://… (from Supabase Storage)" />
-      {form.cover_image_url && (
-        <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(11,31,74,0.1)' }}>
-          <img src={form.cover_image_url} alt="Cover preview" className="w-full h-28 object-cover" onError={e => { e.target.style.display = 'none' }} />
-        </div>
-      )}
+      <PhotoUpload label="Cover Photo" value={form.cover_image_url || ''} onChange={f('cover_image_url')} />
       <Checkbox label="Active (visible to users)" checked={!!form.is_active} onChange={f('is_active')} />
       <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} />
     </div>
