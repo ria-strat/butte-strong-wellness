@@ -25,15 +25,49 @@ function useReveal(delay = 0) {
   return ref
 }
 
+const PeerIcon = () => (
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+    <circle cx="9" cy="7" r="4"/>
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+  </svg>
+)
+
+const MindIcon = () => (
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+  </svg>
+)
+
+const FitnessIcon = () => (
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6.5 6.5v11M17.5 6.5v11"/>
+    <rect x="3.5" y="8.5" width="4" height="7" rx="1"/>
+    <rect x="16.5" y="8.5" width="4" height="7" rx="1"/>
+    <line x1="7.5" y1="12" x2="16.5" y2="12"/>
+  </svg>
+)
+
+const FamilyIcon = () => (
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    <path d="M9 22v-7h6v7"/>
+    <path d="M12 8 a1 1 0 0 1 0 0"/>
+    <circle cx="12" cy="8" r="1.5" fill="currentColor" stroke="none" opacity="0.5"/>
+  </svg>
+)
+
 const resources = [
-  { label: 'Peer Support',         sub: 'Talk to someone',         accent: '#1A8A72', to: '/peer-support',         icon: '⟳' },
-  { label: 'Mindset & Resilience', sub: 'Mental wellness',         accent: '#2563A8', to: '/mindset-resilience',   icon: '◈' },
-  { label: 'Physical Fitness',     sub: 'Stay strong',             accent: '#C9A84C', to: '/physical-fitness',     icon: '◇' },
-  { label: 'Family Resources',     sub: 'Support at home',         accent: '#0B1F4A', to: '/family-resources',     icon: '◉' },
+  { label: 'Peer Support',         sub: 'Talk to someone',     accent: '#1A8A72', to: '/peer-support',       Icon: PeerIcon   },
+  { label: 'Mindset & Resilience', sub: 'Mental wellness',     accent: '#2563A8', to: '/mindset-resilience', Icon: MindIcon   },
+  { label: 'Physical Fitness',     sub: 'Stay strong',         accent: '#C9A84C', to: '/physical-fitness',   Icon: FitnessIcon },
+  { label: 'Family Resources',     sub: 'Support at home',     accent: '#0B1F4A', to: '/family-resources',   Icon: FamilyIcon },
 ]
 
 function ResourceCard({ resource, delay }) {
   const ref = useReveal(delay)
+  const { Icon } = resource
   return (
     <div
       ref={ref}
@@ -42,14 +76,19 @@ function ResourceCard({ resource, delay }) {
     >
       <Link
         to={resource.to}
-        className="flex flex-col gap-2 p-4 pl-5 relative h-full active:opacity-80 active:scale-[0.97]"
+        className="flex flex-col gap-3 p-4 pl-5 relative h-full active:opacity-80 active:scale-[0.97]"
         style={{ transition: 'opacity 0.2s cubic-bezier(0.32,0.72,0,1), transform 0.15s cubic-bezier(0.32,0.72,0,1)' }}
       >
         <div
           className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full"
           style={{ backgroundColor: resource.accent }}
         />
-        <span className="text-xl leading-none mt-0.5">{resource.icon}</span>
+        <div
+          className="w-12 h-12 rounded-xl flex items-center justify-center"
+          style={{ backgroundColor: `${resource.accent}14`, color: resource.accent }}
+        >
+          <Icon />
+        </div>
         <div>
           <p className="font-sans font-semibold text-navy text-sm leading-snug">{resource.label}</p>
           <p className="font-sans text-[11px] mt-0.5" style={{ color: resource.accent, opacity: 0.8 }}>
