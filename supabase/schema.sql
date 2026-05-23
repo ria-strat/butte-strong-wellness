@@ -94,6 +94,7 @@ create table if not exists events (
   location          text,
   description       text,
   registration_url  text,
+  cover_image_url   text,
   is_active         boolean default true,
   created_at        timestamptz default now()
 );

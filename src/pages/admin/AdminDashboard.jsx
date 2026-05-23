@@ -109,7 +109,7 @@ function AddButton({ onClick, label = 'Add' }) {
 
 // ── Empty form templates ─────────────────────────────────────────────────────
 const emptyMember = { name: '', agency: '', phone: '', email: '', bio: '', experience: '', is_chaplain: false, sort_order: 0, is_active: true, photo_url: null }
-const emptyEvent  = { title: '', event_date: '', event_time: '', location: '', description: '', registration_url: '', is_active: true }
+const emptyEvent  = { title: '', event_date: '', event_time: '', location: '', description: '', registration_url: '', cover_image_url: '', is_active: true }
 const emptyTherapist = { name: '', title: '', phone: '', email: '', address: '', insurance: '', bio: '', quote: '', sort_order: 0, is_active: true }
 const emptyCrisis = { name: '', phone: '', description: '', sort_order: 0, is_active: true }
 
@@ -151,6 +151,12 @@ function EventForm({ form, setForm, onSave, onCancel, saving }) {
       <Field label="Location" value={form.location || ''} onChange={f('location')} />
       <Field label="Description" value={form.description || ''} onChange={f('description')} as="textarea" />
       <Field label="Registration URL" value={form.registration_url || ''} onChange={f('registration_url')} type="url" placeholder="https://…" />
+      <Field label="Cover Photo URL" value={form.cover_image_url || ''} onChange={f('cover_image_url')} type="url" placeholder="https://… (from Supabase Storage)" />
+      {form.cover_image_url && (
+        <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(11,31,74,0.1)' }}>
+          <img src={form.cover_image_url} alt="Cover preview" className="w-full h-28 object-cover" onError={e => { e.target.style.display = 'none' }} />
+        </div>
+      )}
       <Checkbox label="Active (visible to users)" checked={!!form.is_active} onChange={f('is_active')} />
       <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} />
     </div>
