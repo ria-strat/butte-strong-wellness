@@ -182,7 +182,7 @@ function AddButton({ onClick, label = 'Add' }) {
 
 // ── Empty form templates ─────────────────────────────────────────────────────
 const emptyMember = { name: '', agency: '', phone: '', email: '', bio: '', experience: '', is_chaplain: false, sort_order: 0, is_active: true, photo_url: null }
-const emptyTeam   = { name: '', role: '', agency: '', phone: '', email: '', bio: '', photo_url: '', accent: '#C9A84C', sort_order: 0, is_active: true }
+const emptyTeam   = { name: '', role: '', agency: '', phone: '', email: '', bio: '', experience: '', photo_url: '', accent: '#C9A84C', sort_order: 0, is_active: true }
 const emptyEvent  = { title: '', event_date: '', event_time: '', location: '', description: '', registration_url: '', cover_image_url: '', is_active: true }
 const emptyTherapist = { name: '', title: '', phone: '', email: '', address: '', insurance: '', bio: '', quote: '', sort_order: 0, is_active: true }
 const emptyCrisis = { name: '', phone: '', description: '', sort_order: 0, is_active: true }
@@ -285,6 +285,7 @@ function TeamForm({ form, setForm, onSave, onCancel, saving }) {
       </div>
       <Field label="Email" value={form.email || ''} onChange={f('email')} type="email" />
       <Field label="Bio" value={form.bio || ''} onChange={f('bio')} as="textarea" />
+      <Field label="Areas of Experience (comma-separated)" value={form.experience || ''} onChange={f('experience')} as="textarea" />
       <PhotoUpload label="Photo" value={form.photo_url || ''} onChange={f('photo_url')} />
       <Field label="Sort Order" value={String(form.sort_order ?? 0)} onChange={v => f('sort_order')(parseInt(v) || 0)} type="number" />
       <Checkbox label="Active" checked={!!form.is_active} onChange={f('is_active')} />
@@ -689,6 +690,183 @@ function CrisisTab() {
   )
 }
 
+// ── FITNESS tab ──────────────────────────────────────────────────────────────
+const emptyItem = { title: '', item_type: 'location', description: '', address: '', phone: '', hours: '', url: '', content: '', sort_order: 0, is_active: true }
+
+function FitItemForm({ form, setForm, onSave, onCancel, saving }) {
+  const f = key => val => setForm(prev => ({ ...prev, [key]: val }))
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Name" value={form.title} onChange={f('title')} required />
+        <div className="flex flex-col gap-1">
+          <label className="font-sans text-[10px] uppercase tracking-[0.15em] text-navy/40 font-semibold">Type</label>
+          <select value={form.item_type} onChange={e => f('item_type')(e.target.value)}
+            className="w-full rounded-lg px-3 py-2 font-sans text-[13px] text-navy bg-white outline-none focus:ring-2 focus:ring-navy/20"
+            style={{ border: '1px solid rgba(11,31,74,0.15)' }}>
+            <option value="location">Location</option>
+            <option value="link">Link / Website</option>
+            <option value="info">Info Only</option>
+          </select>
+        </div>
+      </div>
+      <Field label="Description" value={form.description || ''} onChange={f('description')} as="textarea" />
+      {form.item_type === 'location' && <>
+        <Field label="Address" value={form.address || ''} onChange={f('address')} />
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Phone" value={form.phone || ''} onChange={f('phone')} type="tel" />
+          <Field label="Hours" value={form.hours || ''} onChange={f('hours')} placeholder="Mon–Fri 5am–10pm" />
+        </div>
+        <Field label="Website URL" value={form.url || ''} onChange={f('url')} type="url" placeholder="https://…" />
+      </>}
+      {form.item_type === 'link' && <Field label="URL" value={form.url || ''} onChange={f('url')} type="url" placeholder="https://…" required />}
+      {form.item_type === 'info' && <Field label="Content" value={form.content || ''} onChange={f('content')} as="textarea" placeholder="Text to display" />}
+      <Checkbox label="Active" checked={!!form.is_active} onChange={f('is_active')} />
+      <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} />
+    </div>
+  )
+}
+
+function FitnessTab() {
+  const [cats, setCats] = useState(null)
+  const [version, setVersion] = useState(0)
+  const [addCatOpen, setAddCatOpen] = useState(false)
+  const [catForm, setCatForm] = useState({ title: '', description: '', sort_order: 0, is_active: true })
+  const [addItemCat, setAddItemCat] = useState(null)   // category id that has add-item open
+  const [editItemId, setEditItemId] = useState(null)
+  const [itemForm, setItemForm] = useState(emptyItem)
+  const [saving, setSaving] = useState(false)
+  const [expanded, setExpanded] = useState({})
+
+  useEffect(() => {
+    supabase.from('fitness_categories').select('*, fitness_items(*)').order('sort_order')
+      .then(({ data }) => {
+        setCats((data || []).map(c => ({ ...c, items: (c.fitness_items || []).sort((a, b) => a.sort_order - b.sort_order) })))
+      })
+  }, [version])
+
+  const reload = () => setVersion(v => v + 1)
+  const toggle = id => setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
+
+  async function toggleCat(cat) {
+    await supabase.from('fitness_categories').update({ is_active: !cat.is_active }).eq('id', cat.id)
+    setCats(prev => prev ? prev.map(c => c.id === cat.id ? { ...c, is_active: !c.is_active } : c) : prev)
+  }
+
+  async function toggleItem(item) {
+    await supabase.from('fitness_items').update({ is_active: !item.is_active }).eq('id', item.id)
+    reload()
+  }
+
+  async function saveCategory() {
+    if (!catForm.title.trim()) return
+    setSaving(true)
+    await supabase.from('fitness_categories').insert(catForm)
+    setSaving(false)
+    setAddCatOpen(false)
+    setCatForm({ title: '', description: '', sort_order: 0, is_active: true })
+    reload()
+  }
+
+  async function saveAddItem(catId) {
+    if (!itemForm.title.trim()) return
+    setSaving(true)
+    await supabase.from('fitness_items').insert({ ...itemForm, category_id: catId })
+    setSaving(false)
+    setAddItemCat(null)
+    setItemForm(emptyItem)
+    reload()
+  }
+
+  async function saveEditItem() {
+    if (!itemForm.title.trim()) return
+    setSaving(true)
+    await supabase.from('fitness_items').update(itemForm).eq('id', editItemId)
+    setSaving(false)
+    setEditItemId(null)
+    reload()
+  }
+
+  async function deleteItem(id) {
+    if (!confirm('Remove this item?')) return
+    await supabase.from('fitness_items').delete().eq('id', id)
+    reload()
+  }
+
+  if (cats === null) return <p className="font-sans text-[13px] text-navy/40 py-6 text-center">Loading…</p>
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex justify-end">
+        <AddButton label="Add Category" onClick={() => setAddCatOpen(o => !o)} />
+      </div>
+
+      {addCatOpen && (
+        <AddPanel title="New Category">
+          <div className="flex flex-col gap-3">
+            <Field label="Category Name" value={catForm.title} onChange={v => setCatForm(p => ({ ...p, title: v }))} required />
+            <Field label="Description" value={catForm.description || ''} onChange={v => setCatForm(p => ({ ...p, description: v }))} />
+            <SaveBar onSave={saveCategory} onCancel={() => setAddCatOpen(false)} saving={saving} />
+          </div>
+        </AddPanel>
+      )}
+
+      {cats.map(cat => (
+        <div key={cat.id} className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(11,31,74,0.09)' }}>
+          {/* Category header */}
+          <div className="flex items-center gap-3 px-4 py-3 bg-white">
+            <button onClick={() => toggle(cat.id)} className="flex-1 flex items-center gap-2 text-left cursor-pointer">
+              <span className="font-sans font-semibold text-navy text-[13px]">{cat.title}</span>
+              <span className="font-sans text-[10px] text-navy/30">{cat.items?.length || 0} items</span>
+              <span className="text-navy/25 text-xs ml-auto mr-2">{expanded[cat.id] ? '▲' : '▼'}</span>
+            </button>
+            <Toggle value={cat.is_active} onChange={() => toggleCat(cat)} />
+          </div>
+
+          {/* Items */}
+          {expanded[cat.id] && (
+            <div className="bg-cream/50 px-3 pb-3 pt-1 flex flex-col gap-2">
+              {(cat.items || []).map(item => (
+                <div key={item.id}>
+                  <RowCard
+                    label={item.title}
+                    sub={[item.item_type, item.address || item.url || item.content].filter(Boolean).join(' · ').slice(0, 60)}
+                    active={item.is_active}
+                    onToggle={() => toggleItem(item)}
+                    onEdit={() => { if (editItemId === item.id) { setEditItemId(null) } else { setEditItemId(item.id); setItemForm({ ...item }) } }}
+                    onDelete={() => deleteItem(item.id)}
+                  >
+                    {editItemId === item.id && (
+                      <FormPanel>
+                        <FitItemForm form={itemForm} setForm={setItemForm} onSave={saveEditItem} onCancel={() => setEditItemId(null)} saving={saving} />
+                      </FormPanel>
+                    )}
+                  </RowCard>
+                </div>
+              ))}
+
+              {addItemCat === cat.id ? (
+                <div className="rounded-xl p-3 mt-1" style={{ backgroundColor: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.2)' }}>
+                  <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.15em] text-navy/40 mb-3">New Item</p>
+                  <FitItemForm form={itemForm} setForm={setItemForm} onSave={() => saveAddItem(cat.id)} onCancel={() => { setAddItemCat(null); setItemForm(emptyItem) }} saving={saving} />
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setAddItemCat(cat.id); setEditItemId(null); setItemForm(emptyItem) }}
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-2 font-sans text-[11px] font-semibold cursor-pointer w-full justify-center"
+                  style={{ border: '1px dashed rgba(11,31,74,0.15)', color: 'rgba(11,31,74,0.4)', backgroundColor: 'rgba(11,31,74,0.02)' }}
+                >
+                  <PlusIcon /> Add Item to {cat.title}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ── SIMPLE tab (Fitness only) ────────────────────────────────────────────────
 function SimpleTab({ table, labelKey, subKey }) {
   const [rows, setRows] = useState(null)
@@ -952,7 +1130,7 @@ export default function AdminDashboard() {
         {tab === 'events'     && <EventsTab />}
         {tab === 'therapists' && <TherapistsTab />}
         {tab === 'crisis'     && <CrisisTab />}
-        {tab === 'fitness'    && <SimpleTab table="fitness_categories" labelKey="title" subKey="description" />}
+        {tab === 'fitness'    && <FitnessTab />}
         {tab === 'team'       && <TeamTab />}
         {tab === 'feedback'   && <FeedbackTab />}
       </div>

@@ -188,7 +188,38 @@ grant all on events               to authenticated;
 
 grant usage, select on all sequences in schema public to authenticated;
 
--- ── 10. FEEDBACK TABLE ────────────────────────────────────────────────────────
+-- ── 10. EXPERIENCE COLUMN + ADVISORY MEMBERS ─────────────────────────────────
+alter table team_members add column if not exists experience text;
+
+-- Advisory committee members (run once to migrate from hardcoded)
+insert into team_members (name, role, agency, phone, email, bio, experience, accent, sort_order, is_active) values
+('Miranda Pierce',       'Detective',                        'CPD',  '916-947-0356', 'miranda.pierce@chicoca.gov',
+ 'Officer with the Chico Police Department for approximately 6 years. Currently a Detective. My background is in Psychology and Behavioral Analysis. Family comes first with me and I enjoy helping those around me to get home safely to theirs.',
+ 'In the first 5 years in your career, Experienced a critical incident, Parenting, Divorce, Loss of spouse, Mental health in your family',
+ '#1A8A72', 10, true),
+('Melody Brown',         'Deputy Chief of Operations & HR',  'BEMS', '530-720-7503', 'Mbrown@bcems.org',
+ 'I have been in and around EMS since 2004. I started my 911 career with Butte County EMS in 2007 and have been a paramedic since 2008. I worked as a paramedic and field training officer full-time until 2017 when I also took on the role of Health and Safety Officer. After the Camp Fire, I also took on the role of Human Resources and Education. Now I am the Deputy Chief of Operations and HR.',
+ 'In the first 5 years in your career, Lifelong career (over 15 years), Experienced a critical incident, Mental health in your family, Injury',
+ '#2563A8', 11, true),
+('Ken Smith',            'Firefighter',                      'CFD',  '530-624-2922', 'ken.smith@chicoca.gov',
+ 'Been in the fire service 30 years — 26 years with Chico Fire as a volunteer and career Firefighter. I have a true passion for peer support and promoting a positive vibe in the often negative environment that we serve in. My personal goal is to help others have a healthy balance of work and play, while putting family first.',
+ 'Lifelong career (over 15 years), Experienced a critical incident, Parenting, Finances, Substance use in your family, Mental health in your family, Injury',
+ '#C9A84C', 12, true),
+('John Nickelson',       'Police Officer',                   'CPD',  '530-720-3744', 'john.nickelson@chicoca.gov',
+ 'I have been a police officer since February 2012. In my first 4 years, I was involved in 2 shootings, one of which my partner was hit. I became interested in officer wellness due to the care that my fellow colleagues showed me, and from support I received through Butte County Critical Incident Stress Management. My goal is to help others navigate critical incidents during their careers.',
+ 'Experienced a Critical Incident',
+ '#0B1F4A', 13, true),
+('Christopher B Nicodemus', 'Officer · LEA Instructor',      'CSPD', '530-570-8743', 'cnicodemus@csuchico.edu',
+ 'I have been in law enforcement for 22 years and worked for the Oroville Police Department, Butte County Sheriff''s Office, and California State University, Chico Police Department. I also teach at the Butte College Law Enforcement Academy. I have seen firsthand the importance of improving peer support and wellness programs at my agency and those I previously worked for.',
+ 'Lifelong career (over 15 years), Experienced a critical incident, Experienced an OIS, Parenting',
+ '#1A8A72', 14, true),
+('Alex Duenas',           'Probation Department',            'BCPD', '916-899-8160', 'aduenas@buttecounty.net',
+ 'I have worked with the Butte County Probation Department for 11 years and have seen what this type of work can do to us who work in this field. I want everyone to be healthy and well and to be the best version of themselves — healthy not only for those they serve, but most importantly, their families and their life outside of work.',
+ 'In the first 5 years in your career, Parenting, Finances, Substance use in your family, Mental health in your family, Injury',
+ '#2563A8', 15, true)
+on conflict do nothing;
+
+-- ── 11. FEEDBACK TABLE ────────────────────────────────────────────────────────
 create table if not exists feedback (
   id         serial primary key,
   name       text,
