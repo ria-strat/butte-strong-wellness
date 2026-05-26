@@ -159,15 +159,20 @@ function Checkbox({ label, checked, onChange }) {
   )
 }
 
-function SaveBar({ onSave, onCancel, saving }) {
+function SaveBar({ onSave, onCancel, saving, error }) {
   return (
-    <div className="flex items-center gap-2 pt-1">
-      <button onClick={onSave} disabled={saving} className="flex items-center gap-1.5 rounded-lg px-4 py-2 font-sans text-[12px] font-semibold text-white cursor-pointer disabled:opacity-50" style={{ backgroundColor: '#0B1F4A' }}>
-        <CheckIcon />{saving ? 'Saving…' : 'Save'}
-      </button>
-      <button onClick={onCancel} className="flex items-center gap-1.5 rounded-lg px-4 py-2 font-sans text-[12px] font-semibold text-navy/60 border border-navy/15 cursor-pointer bg-white">
-        <XIcon />Cancel
-      </button>
+    <div className="flex flex-col gap-1.5 pt-1">
+      <div className="flex items-center gap-2">
+        <button onClick={onSave} disabled={saving} className="flex items-center gap-1.5 rounded-lg px-4 py-2 font-sans text-[12px] font-semibold text-white cursor-pointer disabled:opacity-50" style={{ backgroundColor: '#0B1F4A' }}>
+          <CheckIcon />{saving ? 'Saving…' : 'Save'}
+        </button>
+        <button onClick={onCancel} className="flex items-center gap-1.5 rounded-lg px-4 py-2 font-sans text-[12px] font-semibold text-navy/60 border border-navy/15 cursor-pointer bg-white">
+          <XIcon />Cancel
+        </button>
+      </div>
+      {error && (
+        <p className="font-sans text-[11px] text-red-500 leading-snug">⚠ {error}</p>
+      )}
     </div>
   )
 }
@@ -188,7 +193,7 @@ const emptyTherapist = { name: '', title: '', phone: '', email: '', address: '',
 const emptyCrisis = { name: '', phone: '', description: '', sort_order: 0, is_active: true }
 
 // ── Member form (used for both add and edit) ─────────────────────────────────
-function MemberForm({ form, setForm, onSave, onCancel, saving }) {
+function MemberForm({ form, setForm, onSave, onCancel, saving, error }) {
   const f = key => val => setForm(prev => ({ ...prev, [key]: val }))
   return (
     <div className="flex flex-col gap-3">
@@ -208,13 +213,13 @@ function MemberForm({ form, setForm, onSave, onCancel, saving }) {
         <Checkbox label="Is Chaplain" checked={!!form.is_chaplain} onChange={f('is_chaplain')} />
         <Checkbox label="Active" checked={!!form.is_active} onChange={f('is_active')} />
       </div>
-      <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} />
+      <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} error={error} />
     </div>
   )
 }
 
 // ── Event form ───────────────────────────────────────────────────────────────
-function EventForm({ form, setForm, onSave, onCancel, saving }) {
+function EventForm({ form, setForm, onSave, onCancel, saving, error }) {
   const f = key => val => setForm(prev => ({ ...prev, [key]: val }))
   return (
     <div className="flex flex-col gap-3">
@@ -228,13 +233,13 @@ function EventForm({ form, setForm, onSave, onCancel, saving }) {
       <Field label="Registration URL" value={form.registration_url || ''} onChange={f('registration_url')} type="url" placeholder="https://…" />
       <PhotoUpload label="Cover Photo" value={form.cover_image_url || ''} onChange={f('cover_image_url')} />
       <Checkbox label="Active (visible to users)" checked={!!form.is_active} onChange={f('is_active')} />
-      <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} />
+      <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} error={error} />
     </div>
   )
 }
 
 // ── Therapist form ───────────────────────────────────────────────────────────
-function TherapistForm({ form, setForm, onSave, onCancel, saving }) {
+function TherapistForm({ form, setForm, onSave, onCancel, saving, error }) {
   const f = key => val => setForm(prev => ({ ...prev, [key]: val }))
   return (
     <div className="flex flex-col gap-3">
@@ -251,13 +256,13 @@ function TherapistForm({ form, setForm, onSave, onCancel, saving }) {
       <Field label="Bio" value={form.bio || ''} onChange={f('bio')} as="textarea" />
       <Field label="Quote (optional)" value={form.quote || ''} onChange={f('quote')} as="textarea" />
       <Checkbox label="Active" checked={!!form.is_active} onChange={f('is_active')} />
-      <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} />
+      <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} error={error} />
     </div>
   )
 }
 
 // ── Crisis form ──────────────────────────────────────────────────────────────
-function CrisisForm({ form, setForm, onSave, onCancel, saving }) {
+function CrisisForm({ form, setForm, onSave, onCancel, saving, error }) {
   const f = key => val => setForm(prev => ({ ...prev, [key]: val }))
   return (
     <div className="flex flex-col gap-3">
@@ -265,13 +270,13 @@ function CrisisForm({ form, setForm, onSave, onCancel, saving }) {
       <Field label="Phone / Number" value={form.phone || ''} onChange={f('phone')} />
       <Field label="Description" value={form.description || ''} onChange={f('description')} as="textarea" />
       <Checkbox label="Active" checked={!!form.is_active} onChange={f('is_active')} />
-      <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} />
+      <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} error={error} />
     </div>
   )
 }
 
 // ── Team form ────────────────────────────────────────────────────────────────
-function TeamForm({ form, setForm, onSave, onCancel, saving }) {
+function TeamForm({ form, setForm, onSave, onCancel, saving, error }) {
   const f = key => val => setForm(prev => ({ ...prev, [key]: val }))
   return (
     <div className="flex flex-col gap-3">
@@ -289,7 +294,7 @@ function TeamForm({ form, setForm, onSave, onCancel, saving }) {
       <PhotoUpload label="Photo" value={form.photo_url || ''} onChange={f('photo_url')} />
       <Field label="Sort Order" value={String(form.sort_order ?? 0)} onChange={v => f('sort_order')(parseInt(v) || 0)} type="number" />
       <Checkbox label="Active" checked={!!form.is_active} onChange={f('is_active')} />
-      <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} />
+      <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} error={error} />
     </div>
   )
 }
@@ -347,6 +352,7 @@ function MembersTab() {
   const [editId, setEditId] = useState(null)
   const [form, setForm] = useState(emptyMember)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
   const [filter, setFilter] = useState('all')
 
   useEffect(() => {
@@ -367,18 +373,20 @@ function MembersTab() {
 
   async function saveEdit() {
     if (!form.name.trim()) return
-    setSaving(true)
-    await supabase.from('peer_support_members').update(form).eq('id', editId)
+    setSaving(true); setSaveError(null)
+    const { error: err } = await supabase.from('peer_support_members').update(form).eq('id', editId)
     setSaving(false)
+    if (err) { setSaveError(err.message); return }
     setEditId(null)
     reload()
   }
 
   async function saveAdd() {
     if (!form.name.trim()) return
-    setSaving(true)
-    await supabase.from('peer_support_members').insert(form)
+    setSaving(true); setSaveError(null)
+    const { error: err } = await supabase.from('peer_support_members').insert(form)
     setSaving(false)
+    if (err) { setSaveError(err.message); return }
     setAddOpen(false)
     setForm(emptyMember)
     reload()
@@ -406,7 +414,7 @@ function MembersTab() {
 
       {addOpen && (
         <AddPanel title="New Member">
-          <MemberForm form={form} setForm={setForm} onSave={saveAdd} onCancel={() => { setAddOpen(false); setForm(emptyMember) }} saving={saving} />
+          <MemberForm form={form} setForm={setForm} onSave={saveAdd} onCancel={() => { setAddOpen(false); setForm(emptyMember); setSaveError(null) }} saving={saving} error={saveError} />
         </AddPanel>
       )}
 
@@ -427,12 +435,12 @@ function MembersTab() {
               sub={row.phone}
               active={row.is_active}
               onToggle={() => toggleActive(row)}
-              onEdit={() => { if (editId === row.id) { setEditId(null) } else { setEditId(row.id); setForm({ ...row }) } }}
+              onEdit={() => { if (editId === row.id) { setEditId(null); setSaveError(null) } else { setEditId(row.id); setForm({ ...row }); setSaveError(null) } }}
               onDelete={() => deleteRow(row.id)}
             >
               {editId === row.id && (
                 <FormPanel>
-                  <MemberForm form={form} setForm={setForm} onSave={saveEdit} onCancel={() => setEditId(null)} saving={saving} />
+                  <MemberForm form={form} setForm={setForm} onSave={saveEdit} onCancel={() => { setEditId(null); setSaveError(null) }} saving={saving} error={saveError} />
                 </FormPanel>
               )}
             </RowCard>
@@ -452,6 +460,7 @@ function EventsTab() {
   const [editId, setEditId] = useState(null)
   const [form, setForm] = useState(emptyEvent)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
 
   useEffect(() => {
     supabase.from('events').select('*').order('event_date', { ascending: false })
@@ -467,18 +476,20 @@ function EventsTab() {
 
   async function saveEdit() {
     if (!form.title.trim()) return
-    setSaving(true)
-    await supabase.from('events').update(form).eq('id', editId)
+    setSaving(true); setSaveError(null)
+    const { error: err } = await supabase.from('events').update(form).eq('id', editId)
     setSaving(false)
+    if (err) { setSaveError(err.message); return }
     setEditId(null)
     reload()
   }
 
   async function saveAdd() {
     if (!form.title.trim()) return
-    setSaving(true)
-    await supabase.from('events').insert(form)
+    setSaving(true); setSaveError(null)
+    const { error: err } = await supabase.from('events').insert(form)
     setSaving(false)
+    if (err) { setSaveError(err.message); return }
     setAddOpen(false)
     setForm(emptyEvent)
     reload()
@@ -498,7 +509,7 @@ function EventsTab() {
 
       {addOpen && (
         <AddPanel title="New Event">
-          <EventForm form={form} setForm={setForm} onSave={saveAdd} onCancel={() => { setAddOpen(false); setForm(emptyEvent) }} saving={saving} />
+          <EventForm form={form} setForm={setForm} onSave={saveAdd} onCancel={() => { setAddOpen(false); setForm(emptyEvent); setSaveError(null) }} saving={saving} error={saveError} />
         </AddPanel>
       )}
 
@@ -513,12 +524,12 @@ function EventsTab() {
               sub={[row.event_date, row.event_time, row.location].filter(Boolean).join(' · ')}
               active={row.is_active}
               onToggle={() => toggleActive(row)}
-              onEdit={() => { if (editId === row.id) { setEditId(null) } else { setEditId(row.id); setForm({ ...row }) } }}
+              onEdit={() => { if (editId === row.id) { setEditId(null); setSaveError(null) } else { setEditId(row.id); setForm({ ...row }); setSaveError(null) } }}
               onDelete={() => deleteRow(row.id)}
             >
               {editId === row.id && (
                 <FormPanel>
-                  <EventForm form={form} setForm={setForm} onSave={saveEdit} onCancel={() => setEditId(null)} saving={saving} />
+                  <EventForm form={form} setForm={setForm} onSave={saveEdit} onCancel={() => { setEditId(null); setSaveError(null) }} saving={saving} error={saveError} />
                 </FormPanel>
               )}
             </RowCard>
@@ -538,6 +549,7 @@ function TherapistsTab() {
   const [editId, setEditId] = useState(null)
   const [form, setForm] = useState(emptyTherapist)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
 
   useEffect(() => {
     supabase.from('therapists').select('*').order('sort_order')
@@ -553,18 +565,20 @@ function TherapistsTab() {
 
   async function saveEdit() {
     if (!form.name.trim()) return
-    setSaving(true)
-    await supabase.from('therapists').update(form).eq('id', editId)
+    setSaving(true); setSaveError(null)
+    const { error: err } = await supabase.from('therapists').update(form).eq('id', editId)
     setSaving(false)
+    if (err) { setSaveError(err.message); return }
     setEditId(null)
     reload()
   }
 
   async function saveAdd() {
     if (!form.name.trim()) return
-    setSaving(true)
-    await supabase.from('therapists').insert(form)
+    setSaving(true); setSaveError(null)
+    const { error: err } = await supabase.from('therapists').insert(form)
     setSaving(false)
+    if (err) { setSaveError(err.message); return }
     setAddOpen(false)
     setForm(emptyTherapist)
     reload()
@@ -583,7 +597,7 @@ function TherapistsTab() {
       </div>
       {addOpen && (
         <AddPanel title="New Therapist">
-          <TherapistForm form={form} setForm={setForm} onSave={saveAdd} onCancel={() => { setAddOpen(false); setForm(emptyTherapist) }} saving={saving} />
+          <TherapistForm form={form} setForm={setForm} onSave={saveAdd} onCancel={() => { setAddOpen(false); setForm(emptyTherapist); setSaveError(null) }} saving={saving} error={saveError} />
         </AddPanel>
       )}
       {rows === null ? (
@@ -593,12 +607,12 @@ function TherapistsTab() {
           {rows.map(row => (
             <RowCard key={row.id} label={row.name} sub={row.title} active={row.is_active}
               onToggle={() => toggleActive(row)}
-              onEdit={() => { if (editId === row.id) { setEditId(null) } else { setEditId(row.id); setForm({ ...row }) } }}
+              onEdit={() => { if (editId === row.id) { setEditId(null); setSaveError(null) } else { setEditId(row.id); setForm({ ...row }); setSaveError(null) } }}
               onDelete={() => deleteRow(row.id)}
             >
               {editId === row.id && (
                 <FormPanel>
-                  <TherapistForm form={form} setForm={setForm} onSave={saveEdit} onCancel={() => setEditId(null)} saving={saving} />
+                  <TherapistForm form={form} setForm={setForm} onSave={saveEdit} onCancel={() => { setEditId(null); setSaveError(null) }} saving={saving} error={saveError} />
                 </FormPanel>
               )}
             </RowCard>
@@ -618,6 +632,7 @@ function CrisisTab() {
   const [editId, setEditId] = useState(null)
   const [form, setForm] = useState(emptyCrisis)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
 
   useEffect(() => {
     supabase.from('crisis_contacts').select('*').order('sort_order')
@@ -633,18 +648,20 @@ function CrisisTab() {
 
   async function saveEdit() {
     if (!form.name.trim()) return
-    setSaving(true)
-    await supabase.from('crisis_contacts').update(form).eq('id', editId)
+    setSaving(true); setSaveError(null)
+    const { error: err } = await supabase.from('crisis_contacts').update(form).eq('id', editId)
     setSaving(false)
+    if (err) { setSaveError(err.message); return }
     setEditId(null)
     reload()
   }
 
   async function saveAdd() {
     if (!form.name.trim()) return
-    setSaving(true)
-    await supabase.from('crisis_contacts').insert(form)
+    setSaving(true); setSaveError(null)
+    const { error: err } = await supabase.from('crisis_contacts').insert(form)
     setSaving(false)
+    if (err) { setSaveError(err.message); return }
     setAddOpen(false)
     setForm(emptyCrisis)
     reload()
@@ -663,7 +680,7 @@ function CrisisTab() {
       </div>
       {addOpen && (
         <AddPanel title="New Crisis Contact">
-          <CrisisForm form={form} setForm={setForm} onSave={saveAdd} onCancel={() => { setAddOpen(false); setForm(emptyCrisis) }} saving={saving} />
+          <CrisisForm form={form} setForm={setForm} onSave={saveAdd} onCancel={() => { setAddOpen(false); setForm(emptyCrisis); setSaveError(null) }} saving={saving} error={saveError} />
         </AddPanel>
       )}
       {rows === null ? (
@@ -673,12 +690,12 @@ function CrisisTab() {
           {rows.map(row => (
             <RowCard key={row.id} label={row.name} sub={row.phone} active={row.is_active}
               onToggle={() => toggleActive(row)}
-              onEdit={() => { if (editId === row.id) { setEditId(null) } else { setEditId(row.id); setForm({ ...row }) } }}
+              onEdit={() => { if (editId === row.id) { setEditId(null); setSaveError(null) } else { setEditId(row.id); setForm({ ...row }); setSaveError(null) } }}
               onDelete={() => deleteRow(row.id)}
             >
               {editId === row.id && (
                 <FormPanel>
-                  <CrisisForm form={form} setForm={setForm} onSave={saveEdit} onCancel={() => setEditId(null)} saving={saving} />
+                  <CrisisForm form={form} setForm={setForm} onSave={saveEdit} onCancel={() => { setEditId(null); setSaveError(null) }} saving={saving} error={saveError} />
                 </FormPanel>
               )}
             </RowCard>
@@ -693,7 +710,7 @@ function CrisisTab() {
 // ── FITNESS tab ──────────────────────────────────────────────────────────────
 const emptyItem = { title: '', item_type: 'location', description: '', address: '', phone: '', hours: '', url: '', content: '', sort_order: 0, is_active: true }
 
-function FitItemForm({ form, setForm, onSave, onCancel, saving }) {
+function FitItemForm({ form, setForm, onSave, onCancel, saving, error }) {
   const f = key => val => setForm(prev => ({ ...prev, [key]: val }))
   return (
     <div className="flex flex-col gap-3">
@@ -722,7 +739,7 @@ function FitItemForm({ form, setForm, onSave, onCancel, saving }) {
       {form.item_type === 'link' && <Field label="URL" value={form.url || ''} onChange={f('url')} type="url" placeholder="https://…" required />}
       {form.item_type === 'info' && <Field label="Content" value={form.content || ''} onChange={f('content')} as="textarea" placeholder="Text to display" />}
       <Checkbox label="Active" checked={!!form.is_active} onChange={f('is_active')} />
-      <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} />
+      <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} error={error} />
     </div>
   )
 }
@@ -736,6 +753,7 @@ function FitnessTab() {
   const [editItemId, setEditItemId] = useState(null)
   const [itemForm, setItemForm] = useState(emptyItem)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
   const [expanded, setExpanded] = useState({})
 
   useEffect(() => {
@@ -760,9 +778,10 @@ function FitnessTab() {
 
   async function saveCategory() {
     if (!catForm.title.trim()) return
-    setSaving(true)
-    await supabase.from('fitness_categories').insert(catForm)
+    setSaving(true); setSaveError(null)
+    const { error: err } = await supabase.from('fitness_categories').insert(catForm)
     setSaving(false)
+    if (err) { setSaveError(err.message); return }
     setAddCatOpen(false)
     setCatForm({ title: '', description: '', sort_order: 0, is_active: true })
     reload()
@@ -770,9 +789,10 @@ function FitnessTab() {
 
   async function saveAddItem(catId) {
     if (!itemForm.title.trim()) return
-    setSaving(true)
-    await supabase.from('fitness_items').insert({ ...itemForm, category_id: catId })
+    setSaving(true); setSaveError(null)
+    const { error: err } = await supabase.from('fitness_items').insert({ ...itemForm, category_id: catId })
     setSaving(false)
+    if (err) { setSaveError(err.message); return }
     setAddItemCat(null)
     setItemForm(emptyItem)
     reload()
@@ -780,9 +800,10 @@ function FitnessTab() {
 
   async function saveEditItem() {
     if (!itemForm.title.trim()) return
-    setSaving(true)
-    await supabase.from('fitness_items').update(itemForm).eq('id', editItemId)
+    setSaving(true); setSaveError(null)
+    const { error: err } = await supabase.from('fitness_items').update(itemForm).eq('id', editItemId)
     setSaving(false)
+    if (err) { setSaveError(err.message); return }
     setEditItemId(null)
     reload()
   }
@@ -806,7 +827,7 @@ function FitnessTab() {
           <div className="flex flex-col gap-3">
             <Field label="Category Name" value={catForm.title} onChange={v => setCatForm(p => ({ ...p, title: v }))} required />
             <Field label="Description" value={catForm.description || ''} onChange={v => setCatForm(p => ({ ...p, description: v }))} />
-            <SaveBar onSave={saveCategory} onCancel={() => setAddCatOpen(false)} saving={saving} />
+            <SaveBar onSave={saveCategory} onCancel={() => { setAddCatOpen(false); setSaveError(null) }} saving={saving} error={saveError} />
           </div>
         </AddPanel>
       )}
@@ -833,12 +854,12 @@ function FitnessTab() {
                     sub={[item.item_type, item.address || item.url || item.content].filter(Boolean).join(' · ').slice(0, 60)}
                     active={item.is_active}
                     onToggle={() => toggleItem(item)}
-                    onEdit={() => { if (editItemId === item.id) { setEditItemId(null) } else { setEditItemId(item.id); setItemForm({ ...item }) } }}
+                    onEdit={() => { if (editItemId === item.id) { setEditItemId(null); setSaveError(null) } else { setEditItemId(item.id); setItemForm({ ...item }); setSaveError(null) } }}
                     onDelete={() => deleteItem(item.id)}
                   >
                     {editItemId === item.id && (
                       <FormPanel>
-                        <FitItemForm form={itemForm} setForm={setItemForm} onSave={saveEditItem} onCancel={() => setEditItemId(null)} saving={saving} />
+                        <FitItemForm form={itemForm} setForm={setItemForm} onSave={saveEditItem} onCancel={() => { setEditItemId(null); setSaveError(null) }} saving={saving} error={saveError} />
                       </FormPanel>
                     )}
                   </RowCard>
@@ -848,7 +869,7 @@ function FitnessTab() {
               {addItemCat === cat.id ? (
                 <div className="rounded-xl p-3 mt-1" style={{ backgroundColor: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.2)' }}>
                   <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.15em] text-navy/40 mb-3">New Item</p>
-                  <FitItemForm form={itemForm} setForm={setItemForm} onSave={() => saveAddItem(cat.id)} onCancel={() => { setAddItemCat(null); setItemForm(emptyItem) }} saving={saving} />
+                  <FitItemForm form={itemForm} setForm={setItemForm} onSave={() => saveAddItem(cat.id)} onCancel={() => { setAddItemCat(null); setItemForm(emptyItem); setSaveError(null) }} saving={saving} error={saveError} />
                 </div>
               ) : (
                 <button
@@ -901,6 +922,7 @@ function TeamTab() {
   const [editId, setEditId] = useState(null)
   const [form, setForm] = useState(emptyTeam)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
 
   useEffect(() => {
     supabase.from('team_members').select('*').order('sort_order')
@@ -916,18 +938,20 @@ function TeamTab() {
 
   async function saveEdit() {
     if (!form.name.trim()) return
-    setSaving(true)
-    await supabase.from('team_members').update(form).eq('id', editId)
+    setSaving(true); setSaveError(null)
+    const { error: err } = await supabase.from('team_members').update(form).eq('id', editId)
     setSaving(false)
+    if (err) { setSaveError(err.message); return }
     setEditId(null)
     reload()
   }
 
   async function saveAdd() {
     if (!form.name.trim()) return
-    setSaving(true)
-    await supabase.from('team_members').insert(form)
+    setSaving(true); setSaveError(null)
+    const { error: err } = await supabase.from('team_members').insert(form)
     setSaving(false)
+    if (err) { setSaveError(err.message); return }
     setAddOpen(false)
     setForm(emptyTeam)
     reload()
@@ -946,7 +970,7 @@ function TeamTab() {
       </div>
       {addOpen && (
         <AddPanel title="New Team Member">
-          <TeamForm form={form} setForm={setForm} onSave={saveAdd} onCancel={() => { setAddOpen(false); setForm(emptyTeam) }} saving={saving} />
+          <TeamForm form={form} setForm={setForm} onSave={saveAdd} onCancel={() => { setAddOpen(false); setForm(emptyTeam); setSaveError(null) }} saving={saving} error={saveError} />
         </AddPanel>
       )}
       {rows === null ? (
@@ -956,12 +980,12 @@ function TeamTab() {
           {rows.map(row => (
             <RowCard key={row.id} label={row.name} sub={row.role} active={row.is_active}
               onToggle={() => toggleActive(row)}
-              onEdit={() => { if (editId === row.id) { setEditId(null) } else { setEditId(row.id); setForm({ ...row }) } }}
+              onEdit={() => { if (editId === row.id) { setEditId(null); setSaveError(null) } else { setEditId(row.id); setForm({ ...row }); setSaveError(null) } }}
               onDelete={() => deleteRow(row.id)}
             >
               {editId === row.id && (
                 <FormPanel>
-                  <TeamForm form={form} setForm={setForm} onSave={saveEdit} onCancel={() => setEditId(null)} saving={saving} />
+                  <TeamForm form={form} setForm={setForm} onSave={saveEdit} onCancel={() => { setEditId(null); setSaveError(null) }} saving={saving} error={saveError} />
                 </FormPanel>
               )}
             </RowCard>
