@@ -186,3 +186,62 @@ grant all on crisis_contacts      to authenticated;
 grant all on events               to authenticated;
 
 grant usage, select on all sequences in schema public to authenticated;
+
+-- ── 10. FEEDBACK TABLE ────────────────────────────────────────────────────────
+create table if not exists feedback (
+  id         serial primary key,
+  name       text,
+  agency     text,
+  message    text not null,
+  is_read    boolean default false,
+  created_at timestamptz default now()
+);
+
+alter table feedback enable row level security;
+
+create policy "Anyone can submit feedback"
+  on feedback for insert
+  with check (true);
+
+create policy "Admin can read feedback"
+  on feedback for select
+  using (auth.role() = 'authenticated');
+
+create policy "Admin can update feedback"
+  on feedback for update
+  using (auth.role() = 'authenticated');
+
+create policy "Admin can delete feedback"
+  on feedback for delete
+  using (auth.role() = 'authenticated');
+
+grant insert                    on feedback           to anon;
+grant select, update, delete    on feedback           to authenticated;
+grant usage, select             on sequence feedback_id_seq to anon;
+grant usage, select             on sequence feedback_id_seq to authenticated;
+
+-- ── 11. STORAGE BUCKET + POLICIES (photos) ────────────────────────────────────
+-- Creates the bucket if it doesn't exist yet
+insert into storage.buckets (id, name, public)
+  values ('photos', 'photos', true)
+  on conflict (id) do nothing;
+
+-- Anyone can view photos (public bucket)
+create policy "Public can view photos"
+  on storage.objects for select
+  using (bucket_id = 'photos');
+
+-- Authenticated admins can upload
+create policy "Authenticated can upload photos"
+  on storage.objects for insert
+  with check (bucket_id = 'photos' and auth.role() = 'authenticated');
+
+-- Authenticated admins can replace/update
+create policy "Authenticated can update photos"
+  on storage.objects for update
+  using (bucket_id = 'photos' and auth.role() = 'authenticated');
+
+-- Authenticated admins can delete
+create policy "Authenticated can delete photos"
+  on storage.objects for delete
+  using (bucket_id = 'photos' and auth.role() = 'authenticated');
