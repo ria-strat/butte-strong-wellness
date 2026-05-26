@@ -70,6 +70,7 @@ create table if not exists team_members (
   email       text,
   phone       text,
   bio         text,
+  photo_url   text,
   accent      text default '#C9A84C',
   sort_order  int default 0,
   is_active   boolean default true

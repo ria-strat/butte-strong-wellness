@@ -182,6 +182,7 @@ function AddButton({ onClick, label = 'Add' }) {
 
 // ── Empty form templates ─────────────────────────────────────────────────────
 const emptyMember = { name: '', agency: '', phone: '', email: '', bio: '', experience: '', is_chaplain: false, sort_order: 0, is_active: true, photo_url: null }
+const emptyTeam   = { name: '', role: '', agency: '', phone: '', email: '', bio: '', photo_url: '', accent: '#C9A84C', sort_order: 0, is_active: true }
 const emptyEvent  = { title: '', event_date: '', event_time: '', location: '', description: '', registration_url: '', cover_image_url: '', is_active: true }
 const emptyTherapist = { name: '', title: '', phone: '', email: '', address: '', insurance: '', bio: '', quote: '', sort_order: 0, is_active: true }
 const emptyCrisis = { name: '', phone: '', description: '', sort_order: 0, is_active: true }
@@ -263,6 +264,29 @@ function CrisisForm({ form, setForm, onSave, onCancel, saving }) {
       <Field label="Name" value={form.name} onChange={f('name')} required />
       <Field label="Phone / Number" value={form.phone || ''} onChange={f('phone')} />
       <Field label="Description" value={form.description || ''} onChange={f('description')} as="textarea" />
+      <Checkbox label="Active" checked={!!form.is_active} onChange={f('is_active')} />
+      <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} />
+    </div>
+  )
+}
+
+// ── Team form ────────────────────────────────────────────────────────────────
+function TeamForm({ form, setForm, onSave, onCancel, saving }) {
+  const f = key => val => setForm(prev => ({ ...prev, [key]: val }))
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Name" value={form.name} onChange={f('name')} required />
+        <Field label="Role / Title" value={form.role || ''} onChange={f('role')} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Agency" value={form.agency || ''} onChange={f('agency')} />
+        <Field label="Phone" value={form.phone || ''} onChange={f('phone')} type="tel" />
+      </div>
+      <Field label="Email" value={form.email || ''} onChange={f('email')} type="email" />
+      <Field label="Bio" value={form.bio || ''} onChange={f('bio')} as="textarea" />
+      <PhotoUpload label="Photo" value={form.photo_url || ''} onChange={f('photo_url')} />
+      <Field label="Sort Order" value={String(form.sort_order ?? 0)} onChange={v => f('sort_order')(parseInt(v) || 0)} type="number" />
       <Checkbox label="Active" checked={!!form.is_active} onChange={f('is_active')} />
       <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} />
     </div>
@@ -510,6 +534,7 @@ function TherapistsTab() {
   const [rows, setRows] = useState(null)
   const [version, setVersion] = useState(0)
   const [addOpen, setAddOpen] = useState(false)
+  const [editId, setEditId] = useState(null)
   const [form, setForm] = useState(emptyTherapist)
   const [saving, setSaving] = useState(false)
 
@@ -525,6 +550,15 @@ function TherapistsTab() {
     setRows(prev => prev ? prev.map(r => r.id === row.id ? { ...r, is_active: !r.is_active } : r) : prev)
   }
 
+  async function saveEdit() {
+    if (!form.name.trim()) return
+    setSaving(true)
+    await supabase.from('therapists').update(form).eq('id', editId)
+    setSaving(false)
+    setEditId(null)
+    reload()
+  }
+
   async function saveAdd() {
     if (!form.name.trim()) return
     setSaving(true)
@@ -535,10 +569,16 @@ function TherapistsTab() {
     reload()
   }
 
+  async function deleteRow(id) {
+    if (!confirm('Remove this therapist?')) return
+    await supabase.from('therapists').delete().eq('id', id)
+    reload()
+  }
+
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <AddButton label="Add Therapist" onClick={() => setAddOpen(o => !o)} />
+        <AddButton label="Add Therapist" onClick={() => { setAddOpen(o => !o); setEditId(null); setForm(emptyTherapist) }} />
       </div>
       {addOpen && (
         <AddPanel title="New Therapist">
@@ -550,8 +590,19 @@ function TherapistsTab() {
       ) : (
         <div className="flex flex-col gap-2">
           {rows.map(row => (
-            <RowCard key={row.id} label={row.name} sub={row.title} active={row.is_active} onToggle={() => toggleActive(row)} />
+            <RowCard key={row.id} label={row.name} sub={row.title} active={row.is_active}
+              onToggle={() => toggleActive(row)}
+              onEdit={() => { if (editId === row.id) { setEditId(null) } else { setEditId(row.id); setForm({ ...row }) } }}
+              onDelete={() => deleteRow(row.id)}
+            >
+              {editId === row.id && (
+                <FormPanel>
+                  <TherapistForm form={form} setForm={setForm} onSave={saveEdit} onCancel={() => setEditId(null)} saving={saving} />
+                </FormPanel>
+              )}
+            </RowCard>
           ))}
+          {rows.length === 0 && <p className="font-sans text-[13px] text-navy/40 py-6 text-center">No therapists yet.</p>}
         </div>
       )}
     </div>
@@ -563,6 +614,7 @@ function CrisisTab() {
   const [rows, setRows] = useState(null)
   const [version, setVersion] = useState(0)
   const [addOpen, setAddOpen] = useState(false)
+  const [editId, setEditId] = useState(null)
   const [form, setForm] = useState(emptyCrisis)
   const [saving, setSaving] = useState(false)
 
@@ -578,6 +630,15 @@ function CrisisTab() {
     setRows(prev => prev ? prev.map(r => r.id === row.id ? { ...r, is_active: !r.is_active } : r) : prev)
   }
 
+  async function saveEdit() {
+    if (!form.name.trim()) return
+    setSaving(true)
+    await supabase.from('crisis_contacts').update(form).eq('id', editId)
+    setSaving(false)
+    setEditId(null)
+    reload()
+  }
+
   async function saveAdd() {
     if (!form.name.trim()) return
     setSaving(true)
@@ -588,10 +649,16 @@ function CrisisTab() {
     reload()
   }
 
+  async function deleteRow(id) {
+    if (!confirm('Remove this crisis contact?')) return
+    await supabase.from('crisis_contacts').delete().eq('id', id)
+    reload()
+  }
+
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <AddButton label="Add Contact" onClick={() => setAddOpen(o => !o)} />
+        <AddButton label="Add Contact" onClick={() => { setAddOpen(o => !o); setEditId(null); setForm(emptyCrisis) }} />
       </div>
       {addOpen && (
         <AddPanel title="New Crisis Contact">
@@ -603,15 +670,26 @@ function CrisisTab() {
       ) : (
         <div className="flex flex-col gap-2">
           {rows.map(row => (
-            <RowCard key={row.id} label={row.name} sub={row.phone} active={row.is_active} onToggle={() => toggleActive(row)} />
+            <RowCard key={row.id} label={row.name} sub={row.phone} active={row.is_active}
+              onToggle={() => toggleActive(row)}
+              onEdit={() => { if (editId === row.id) { setEditId(null) } else { setEditId(row.id); setForm({ ...row }) } }}
+              onDelete={() => deleteRow(row.id)}
+            >
+              {editId === row.id && (
+                <FormPanel>
+                  <CrisisForm form={form} setForm={setForm} onSave={saveEdit} onCancel={() => setEditId(null)} saving={saving} />
+                </FormPanel>
+              )}
+            </RowCard>
           ))}
+          {rows.length === 0 && <p className="font-sans text-[13px] text-navy/40 py-6 text-center">No contacts yet.</p>}
         </div>
       )}
     </div>
   )
 }
 
-// ── SIMPLE tab (Fitness, Team) ───────────────────────────────────────────────
+// ── SIMPLE tab (Fitness only) ────────────────────────────────────────────────
 function SimpleTab({ table, labelKey, subKey }) {
   const [rows, setRows] = useState(null)
 
@@ -633,6 +711,86 @@ function SimpleTab({ table, labelKey, subKey }) {
         <RowCard key={row.id} label={row[labelKey]} sub={subKey ? row[subKey] : null} active={row.is_active} onToggle={() => toggleActive(row)} />
       ))}
       {rows.length === 0 && <p className="font-sans text-[13px] text-navy/40 py-6 text-center">No records.</p>}
+    </div>
+  )
+}
+
+// ── TEAM tab ─────────────────────────────────────────────────────────────────
+function TeamTab() {
+  const [rows, setRows] = useState(null)
+  const [version, setVersion] = useState(0)
+  const [addOpen, setAddOpen] = useState(false)
+  const [editId, setEditId] = useState(null)
+  const [form, setForm] = useState(emptyTeam)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    supabase.from('team_members').select('*').order('sort_order')
+      .then(({ data }) => setRows(data || []))
+  }, [version])
+
+  const reload = () => setVersion(v => v + 1)
+
+  async function toggleActive(row) {
+    await supabase.from('team_members').update({ is_active: !row.is_active }).eq('id', row.id)
+    setRows(prev => prev ? prev.map(r => r.id === row.id ? { ...r, is_active: !r.is_active } : r) : prev)
+  }
+
+  async function saveEdit() {
+    if (!form.name.trim()) return
+    setSaving(true)
+    await supabase.from('team_members').update(form).eq('id', editId)
+    setSaving(false)
+    setEditId(null)
+    reload()
+  }
+
+  async function saveAdd() {
+    if (!form.name.trim()) return
+    setSaving(true)
+    await supabase.from('team_members').insert(form)
+    setSaving(false)
+    setAddOpen(false)
+    setForm(emptyTeam)
+    reload()
+  }
+
+  async function deleteRow(id) {
+    if (!confirm('Remove this team member?')) return
+    await supabase.from('team_members').delete().eq('id', id)
+    reload()
+  }
+
+  return (
+    <div>
+      <div className="flex justify-end mb-4">
+        <AddButton label="Add Member" onClick={() => { setAddOpen(o => !o); setEditId(null); setForm(emptyTeam) }} />
+      </div>
+      {addOpen && (
+        <AddPanel title="New Team Member">
+          <TeamForm form={form} setForm={setForm} onSave={saveAdd} onCancel={() => { setAddOpen(false); setForm(emptyTeam) }} saving={saving} />
+        </AddPanel>
+      )}
+      {rows === null ? (
+        <p className="font-sans text-[13px] text-navy/40 py-6 text-center">Loading…</p>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {rows.map(row => (
+            <RowCard key={row.id} label={row.name} sub={row.role} active={row.is_active}
+              onToggle={() => toggleActive(row)}
+              onEdit={() => { if (editId === row.id) { setEditId(null) } else { setEditId(row.id); setForm({ ...row }) } }}
+              onDelete={() => deleteRow(row.id)}
+            >
+              {editId === row.id && (
+                <FormPanel>
+                  <TeamForm form={form} setForm={setForm} onSave={saveEdit} onCancel={() => setEditId(null)} saving={saving} />
+                </FormPanel>
+              )}
+            </RowCard>
+          ))}
+          {rows.length === 0 && <p className="font-sans text-[13px] text-navy/40 py-6 text-center">No team members yet.</p>}
+        </div>
+      )}
     </div>
   )
 }
@@ -795,7 +953,7 @@ export default function AdminDashboard() {
         {tab === 'therapists' && <TherapistsTab />}
         {tab === 'crisis'     && <CrisisTab />}
         {tab === 'fitness'    && <SimpleTab table="fitness_categories" labelKey="title" subKey="description" />}
-        {tab === 'team'       && <SimpleTab table="team_members" labelKey="name" subKey="role" />}
+        {tab === 'team'       && <TeamTab />}
         {tab === 'feedback'   && <FeedbackTab />}
       </div>
     </div>
