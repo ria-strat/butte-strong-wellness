@@ -59,7 +59,8 @@ export default function Feedback() {
     })
 
     if (error) {
-      setStatus('error')
+      console.error('Feedback submit error:', error)
+      setStatus(error.message || 'error')
     } else {
       setStatus('success')
       setName('')
@@ -201,9 +202,9 @@ export default function Feedback() {
               </div>
 
               {/* Error */}
-              {status === 'error' && (
+              {status !== 'idle' && status !== 'submitting' && status !== 'success' && (
                 <p className="font-sans text-[12px] text-red-500 text-center -mt-1">
-                  Something went wrong. Please try again.
+                  {status}
                 </p>
               )}
 
