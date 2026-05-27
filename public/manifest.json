@@ -1,0 +1,28 @@
+{
+  "name": "Butte Strong Wellness",
+  "short_name": "Butte Strong",
+  "description": "First Responder Wellness Unit — Butte County",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B1F4A",
+  "theme_color": "#0B1F4A",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

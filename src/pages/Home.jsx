@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import LogoLockup from '../components/LogoLockup'
 
 function useReveal(delay = 0) {
   const ref = useRef(null)
@@ -120,29 +121,12 @@ export default function Home() {
           }}
         />
 
-        {/* Eyebrow pill */}
-        <div className="relative z-10 mb-4">
-          <span
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-sans text-[10px] uppercase tracking-[0.22em] font-medium"
-            style={{ border: '1px solid rgba(201,168,76,0.35)', color: 'rgba(201,168,76,0.85)' }}
-          >
-            <span
-              className="w-1 h-1 rounded-full"
-              style={{ backgroundColor: '#C9A84C', opacity: 0.7 }}
-            />
-            Butte County
-          </span>
+        {/* Logo lockup */}
+        <div className="relative z-10 mb-3">
+          <LogoLockup dark={true} size={54} />
         </div>
 
-        {/* Display heading */}
-        <h1
-          className="relative z-10 font-display text-cream uppercase leading-[0.9] tracking-wide"
-          style={{ fontSize: 'clamp(3.5rem, 16vw, 5rem)' }}
-        >
-          Butte<br />Strong<br />Wellness
-        </h1>
-
-        <p className="relative z-10 mt-4 font-sans text-[13px] leading-relaxed" style={{ color: 'rgba(244,242,238,0.45)' }}>
+        <p className="relative z-10 mt-2 font-sans text-[13px] leading-relaxed" style={{ color: 'rgba(244,242,238,0.45)' }}>
           Confidential support for those who serve<br />Butte County — and the families who stand beside them.
         </p>
 

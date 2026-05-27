@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import SkeletonCard from '../components/SkeletonCard'
 import ErrorState from '../components/ErrorState'
+import LogoLockup from '../components/LogoLockup'
 
 function useReveal(delay = 0) {
   const ref = useRef(null)
@@ -209,19 +210,8 @@ export default function About() {
           <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ backgroundColor: '#C9A84C' }} />
 
           <div ref={headerRef} className="relative z-10">
-            <span
-              className="inline-block rounded-full px-3 py-1 font-sans text-[10px] uppercase tracking-[0.2em] font-medium mb-3"
-              style={{ border: '1px solid rgba(201,168,76,0.35)', color: 'rgba(201,168,76,0.8)' }}
-            >
-              The Unit
-            </span>
-            <h1
-              className="font-display text-cream uppercase leading-[0.9] tracking-wide"
-              style={{ fontSize: 'clamp(2.8rem,13vw,3.8rem)' }}
-            >
-              Butte<br />Strong
-            </h1>
-            <p className="font-sans text-[13px] leading-relaxed mt-2" style={{ color: 'rgba(244,242,238,0.45)' }}>
+            <LogoLockup dark={true} size={48} />
+            <p className="font-sans text-[13px] leading-relaxed mt-4" style={{ color: 'rgba(244,242,238,0.45)' }}>
               A multi-agency group dedicated to the wellness of Butte County first responders and their families.
             </p>
           </div>
