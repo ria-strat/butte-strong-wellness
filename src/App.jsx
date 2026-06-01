@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { AuthProvider, useAuth } from './lib/auth'
 import BottomNav from './components/BottomNav'
-import Onboarding from './pages/Onboarding'
 
+import Login from './pages/Login'
 import Home from './pages/Home'
 import PeerSupport from './pages/PeerSupport'
 import PhysicalFitness from './pages/PhysicalFitness'
@@ -16,44 +16,63 @@ import Resources from './pages/Resources'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminDashboard from './pages/admin/AdminDashboard'
 
-// Separate shell so we can read location for admin layout
-function AppShell({ onboarded, onOnboardingComplete }) {
+// Full-screen loading spinner shown while session is being checked
+function LoadingScreen() {
+  return (
+    <div className="min-h-[100dvh] bg-navy flex items-center justify-center">
+      <svg className="animate-spin" width="28" height="28" viewBox="0 0 24 24"
+        fill="none" stroke="#C9A84C" strokeWidth="2.5">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+      </svg>
+    </div>
+  )
+}
+
+function AppShell() {
   const location = useLocation()
+  const { session, loading } = useAuth()
   const isAdmin = location.pathname.startsWith('/admin')
 
-  // Admin routes: full-width, no BottomNav, bypass onboarding
+  // Still checking session — show spinner to avoid flash
+  if (loading) return <LoadingScreen />
+
+  // Admin routes: bypass auth gate (AdminDashboard handles its own auth + role check)
   if (isAdmin) {
     return (
       <Routes>
-        <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/admin"           element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
       </Routes>
     )
   }
 
-  // Onboarding gate
-  if (!onboarded) {
+  // Not logged in → login page or redirect to it
+  if (!session) {
     return (
-      <div className="max-w-md mx-auto min-h-[100dvh]">
-        <Onboarding onComplete={onOnboardingComplete} />
-      </div>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="*"      element={<Navigate to="/login" replace />} />
+      </Routes>
     )
   }
 
-  // Main app
+  // Logged in → full app
   return (
     <div className="flex flex-col min-h-screen max-w-md mx-auto bg-cream pb-16">
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/peer-support" element={<PeerSupport />} />
-        <Route path="/physical-fitness" element={<PhysicalFitness />} />
+        <Route path="/"                  element={<Home />} />
+        <Route path="/peer-support"      element={<PeerSupport />} />
+        <Route path="/physical-fitness"  element={<PhysicalFitness />} />
         <Route path="/mindset-resilience" element={<MindsetResilience />} />
-        <Route path="/family-resources" element={<FamilyResources />} />
-        <Route path="/news-events" element={<NewsEvents />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/feedback" element={<Feedback />} />
-        <Route path="/get-help" element={<GetHelp />} />
-        <Route path="/resources" element={<Resources />} />
+        <Route path="/family-resources"  element={<FamilyResources />} />
+        <Route path="/news-events"       element={<NewsEvents />} />
+        <Route path="/about"             element={<About />} />
+        <Route path="/feedback"          element={<Feedback />} />
+        <Route path="/get-help"          element={<GetHelp />} />
+        <Route path="/resources"         element={<Resources />} />
+        {/* Logged-in users hitting /login go to home */}
+        <Route path="/login"             element={<Navigate to="/" replace />} />
+        <Route path="*"                  element={<Navigate to="/" replace />} />
       </Routes>
       <BottomNav />
     </div>
@@ -61,16 +80,11 @@ function AppShell({ onboarded, onOnboardingComplete }) {
 }
 
 export default function App() {
-  const [agency, setAgency] = useState(() => localStorage.getItem('bsw_agency'))
-
-  function handleOnboardingComplete(selectedAgency) {
-    localStorage.setItem('bsw_agency', selectedAgency)
-    setAgency(selectedAgency)
-  }
-
   return (
     <BrowserRouter>
-      <AppShell onboarded={!!agency} onOnboardingComplete={handleOnboardingComplete} />
+      <AuthProvider>
+        <AppShell />
+      </AuthProvider>
     </BrowserRouter>
   )
 }

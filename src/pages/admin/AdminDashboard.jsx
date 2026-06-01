@@ -1200,14 +1200,24 @@ export default function AdminDashboard() {
   const navigate = useNavigate()
   const [session, setSession] = useState(null)
   const [checking, setChecking] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [tab, setTab] = useState('members')
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
+    async function checkAuth() {
+      const { data: { session: s } } = await supabase.auth.getSession()
       if (!s) { navigate('/admin'); return }
+      // Check admin role
+      const { data: adminRow } = await supabase
+        .from('admins')
+        .select('user_id')
+        .eq('user_id', s.user.id)
+        .single()
       setSession(s)
+      setIsAdmin(!!adminRow)
       setChecking(false)
-    })
+    }
+    checkAuth()
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       if (!s) navigate('/admin')
       else setSession(s)
@@ -1224,6 +1234,21 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
         <p className="font-sans text-navy/40 text-sm">Checking session…</p>
+      </div>
+    )
+  }
+
+  // Logged in but not an admin
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-navy flex flex-col items-center justify-center px-6 text-center gap-4">
+        <p className="font-display text-cream uppercase tracking-wide text-[2rem]">Access Denied</p>
+        <p className="font-sans text-cream/40 text-[13px]">Your account does not have admin access.</p>
+        <button onClick={signOut}
+          className="mt-2 rounded-full px-6 py-2.5 font-sans text-[13px] font-semibold cursor-pointer"
+          style={{ backgroundColor: 'rgba(201,168,76,0.15)', color: '#C9A84C' }}>
+          Sign Out
+        </button>
       </div>
     )
   }
