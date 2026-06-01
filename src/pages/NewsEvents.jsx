@@ -274,19 +274,19 @@ export default function NewsEvents() {
           </div>
         )}
 
-        {/* News articles */}
-        {!loading && articles && articles.length > 0 && (
-          <>
-            <SectionDivider label="News" />
-            {articles.map((a, i) => <ArticleCard key={a.id} article={a} index={i} />)}
-          </>
-        )}
-
         {/* Upcoming events */}
         {!loading && upcoming.length > 0 && (
           <>
             <SectionDivider label="Upcoming Events" />
             {upcoming.map((e, i) => <EventCard key={e.id} event={e} index={i} />)}
+          </>
+        )}
+
+        {/* News articles */}
+        {!loading && articles && articles.length > 0 && (
+          <>
+            <SectionDivider label="News" />
+            {articles.map((a, i) => <ArticleCard key={a.id} article={a} index={i} />)}
           </>
         )}
 
