@@ -70,12 +70,13 @@ function SignInForm({ onForgotPassword }) {
 
 // ── Create Account ─────────────────────────────────────────────────────────────
 function CreateAccountForm() {
-  const [step, setStep]         = useState(1)   // 1 = access code, 2 = email+password+agency
+  const [step, setStep]         = useState(1)   // 1 = access code, 2 = email+password+agency+staffType
   const [code, setCode]         = useState('')
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm]   = useState('')
   const [agency, setAgency]     = useState('')
+  const [staffType, setStaffType] = useState('')
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState(null)
   const [success, setSuccess]   = useState(false)
@@ -102,7 +103,7 @@ function CreateAccountForm() {
     const { error: err } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { agency: agency || null } },
+      options: { data: { agency: agency || null, staff_type: staffType || null } },
     })
     setLoading(false)
     if (err) { setError(err.message); return }
@@ -125,7 +126,7 @@ function CreateAccountForm() {
             Click it to activate your account, then come back and sign in.
           </p>
         </div>
-        <button onClick={() => { setSuccess(false); setStep(1); setCode(''); setEmail(''); setPassword(''); setConfirm('') }}
+        <button onClick={() => { setSuccess(false); setStep(1); setCode(''); setEmail(''); setPassword(''); setConfirm(''); setAgency(''); setStaffType('') }}
           className="font-sans text-[13px] text-cream/40 hover:text-cream/70 transition-colors cursor-pointer mt-2">
           ← Back to sign in
         </button>
@@ -198,6 +199,34 @@ function CreateAccountForm() {
           <option value="">Select your agency…</option>
           {AGENCIES.map(a => <option key={a} value={a}>{a}</option>)}
         </select>
+      </div>
+
+      {/* Staff type — pill buttons */}
+      <div className="flex flex-col gap-2">
+        <label className="font-sans text-[10px] uppercase tracking-[0.2em] text-cream/40 font-semibold">
+          I am a… <span className="normal-case tracking-normal text-cream/25">(optional)</span>
+        </label>
+        <div className="flex gap-2">
+          {['Sworn Staff', 'Civilian Staff', 'Family Member'].map(type => {
+            const active = staffType === type
+            return (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setStaffType(active ? '' : type)}
+                className="flex-1 rounded-xl py-2.5 font-sans text-[12px] font-semibold cursor-pointer transition-all"
+                style={{
+                  backgroundColor: active ? '#C9A84C' : 'rgba(255,255,255,0.06)',
+                  color: active ? '#0B1F4A' : 'rgba(244,242,238,0.45)',
+                  border: active ? '1px solid #C9A84C' : '1px solid rgba(201,168,76,0.15)',
+                  transition: 'all 0.15s cubic-bezier(0.32,0.72,0,1)',
+                }}
+              >
+                {type}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {error && <p className="font-sans text-[12px] text-red-400 -mt-1">{error}</p>}
