@@ -40,17 +40,6 @@ export default function LogoLockup({ dark = true, size = 54 }) {
         }}>
           Wellness Unit
         </span>
-        <span style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: `${subSize}px`,
-          fontWeight: 600,
-          color: subColor,
-          letterSpacing: '0.18em',
-          textTransform: 'uppercase',
-          marginTop: '5px',
-        }}>
-          First Responder Wellness Unit
-        </span>
       </div>
 
     </div>
