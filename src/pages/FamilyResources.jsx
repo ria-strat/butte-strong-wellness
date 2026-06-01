@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-const ACCENT = '#1A8A72'
+const ACCENT = '#C62828'
 
 const PhoneIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

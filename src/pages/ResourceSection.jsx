@@ -28,7 +28,7 @@ function useReveal(delay = 0) {
 }
 
 const accentMap = {
-  '#1A8A72': 'teal',
+  '#C62828': 'teal',
   '#2563A8': 'blue',
   '#C9A84C': 'gold',
   '#0B1F4A': 'navy',
@@ -53,7 +53,7 @@ function AnimatedCard({ resource, accent, index }) {
 export default function ResourceSection({
   title,
   subtitle,
-  accent = '#1A8A72',
+  accent = '#C62828',
   resources = [],
   loading = false,
   error = null,

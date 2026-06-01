@@ -60,7 +60,7 @@ const FamilyIcon = () => (
 )
 
 const resources = [
-  { label: 'Peer Support',         sub: 'Talk to someone',     accent: '#1A8A72', to: '/peer-support',       Icon: PeerIcon   },
+  { label: 'Peer Support',         sub: 'Talk to someone',     accent: '#C62828', to: '/peer-support',       Icon: PeerIcon   },
   { label: 'Mindset & Resilience', sub: 'Mental wellness',     accent: '#2563A8', to: '/mindset-resilience', Icon: MindIcon   },
   { label: 'Physical Fitness',     sub: 'Stay strong',         accent: '#C9A84C', to: '/physical-fitness',   Icon: FitnessIcon },
   { label: 'Family Resources',     sub: 'Support at home',     accent: '#0B1F4A', to: '/family-resources',   Icon: FamilyIcon },

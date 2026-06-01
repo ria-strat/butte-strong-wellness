@@ -211,7 +211,7 @@ function SectionLabel({ label, delay }) {
   )
 }
 
-const ACCENT = '#1A8A72'
+const ACCENT = '#C62828'
 
 export default function PeerSupport() {
   const headerRef = useReveal(0)

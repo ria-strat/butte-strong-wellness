@@ -120,7 +120,7 @@ export default function Feedback() {
                 className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
                 style={{ backgroundColor: 'rgba(26,138,114,0.1)' }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A8A72" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>

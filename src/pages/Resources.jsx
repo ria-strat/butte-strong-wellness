@@ -30,7 +30,7 @@ const SECTIONS = [
     to: '/peer-support',
     label: 'Peer Support',
     sub: 'Talk to a trained colleague who understands what first responders carry.',
-    accent: '#1A8A72',
+    accent: '#C62828',
     icon: (
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
@@ -79,7 +79,7 @@ const SECTIONS = [
     to: '/news-events',
     label: 'News & Events',
     sub: 'Upcoming wellness events, training opportunities, and unit news.',
-    accent: '#1A8A72',
+    accent: '#C62828',
     icon: (
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
