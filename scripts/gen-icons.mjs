@@ -65,12 +65,12 @@ function iconSvg(size) {
     <path
       d="M36 2L4 14v24c0 20 13.5 34.5 32 42 18.5-7.5 32-22 32-42V14L36 2z"
       fill="#0B1F4A"
-      stroke="#C9A84C"
+      stroke="#C62828"
       stroke-width="2.5"
     />
     <polyline
       points="8,42 18,42 22,28 27,56 31,36 36,36 40,48 45,22 50,42 64,42"
-      stroke="#C9A84C"
+      stroke="#FFFFFF"
       stroke-width="2.2"
       fill="none"
       stroke-linecap="round"
@@ -86,7 +86,7 @@ function iconSvg(size) {
 const icons = [
   { file: 'icon-512.png',            size: 512 },
   { file: 'icon-192.png',            size: 192 },
-  { file: 'apple-touch-icon-v2.png', size: 180 }, // ← bump to v3 on next redesign
+  { file: 'apple-touch-icon-v3.png', size: 180 }, // bumped v2→v3: red stroke + white pulse
 ]
 
 // ── Render & write ────────────────────────────────────────────

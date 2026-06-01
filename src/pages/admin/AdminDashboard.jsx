@@ -187,9 +187,9 @@ function AddButton({ onClick, label = 'Add' }) {
 
 // ── Empty form templates ─────────────────────────────────────────────────────
 const emptyMember = { name: '', agency: '', phone: '', email: '', bio: '', experience: '', is_chaplain: false, sort_order: 0, is_active: true, photo_url: null }
-const emptyTeam   = { name: '', role: '', agency: '', phone: '', email: '', bio: '', experience: '', photo_url: '', accent: '#C9A84C', sort_order: 0, is_active: true }
+const emptyTeam   = { name: '', role: '', agency: '', phone: '', email: '', bio: '', experience: '', photo_url: '', accent: '#C9A84C', member_type: 'agency_contact', sort_order: 0, is_active: true }
 const emptyEvent  = { title: '', event_date: '', event_time: '', location: '', description: '', registration_url: '', cover_image_url: '', is_active: true }
-const emptyTherapist = { name: '', title: '', phone: '', email: '', address: '', insurance: '', bio: '', quote: '', sort_order: 0, is_active: true }
+const emptyTherapist = { name: '', title: '', phone: '', email: '', address: '', insurance: '', bio: '', quote: '', photo_url: null, sort_order: 0, is_active: true }
 const emptyCrisis = { name: '', phone: '', description: '', sort_order: 0, is_active: true }
 
 // ── Member form (used for both add and edit) ─────────────────────────────────
@@ -255,6 +255,7 @@ function TherapistForm({ form, setForm, onSave, onCancel, saving, error }) {
       <Field label="Insurance / Payment" value={form.insurance || ''} onChange={f('insurance')} as="textarea" />
       <Field label="Bio" value={form.bio || ''} onChange={f('bio')} as="textarea" />
       <Field label="Quote (optional)" value={form.quote || ''} onChange={f('quote')} as="textarea" />
+      <PhotoUpload label="Photo" value={form.photo_url || ''} onChange={f('photo_url')} />
       <Checkbox label="Active" checked={!!form.is_active} onChange={f('is_active')} />
       <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} error={error} />
     </div>
@@ -292,6 +293,15 @@ function TeamForm({ form, setForm, onSave, onCancel, saving, error }) {
       <Field label="Bio" value={form.bio || ''} onChange={f('bio')} as="textarea" />
       <Field label="Areas of Experience (comma-separated)" value={form.experience || ''} onChange={f('experience')} as="textarea" />
       <PhotoUpload label="Photo" value={form.photo_url || ''} onChange={f('photo_url')} />
+      <div className="flex flex-col gap-1">
+        <label className="font-sans text-[10px] uppercase tracking-[0.15em] text-navy/40 font-semibold">Role on Team</label>
+        <select value={form.member_type || 'agency_contact'} onChange={e => f('member_type')(e.target.value)}
+          className="w-full rounded-lg px-3 py-2 font-sans text-[13px] text-navy bg-white outline-none focus:ring-2 focus:ring-navy/20"
+          style={{ border: '1px solid rgba(11,31,74,0.15)' }}>
+          <option value="agency_contact">Agency Contact</option>
+          <option value="staff">Wellness Unit Staff</option>
+        </select>
+      </div>
       <Field label="Sort Order" value={String(form.sort_order ?? 0)} onChange={v => f('sort_order')(parseInt(v) || 0)} type="number" />
       <Checkbox label="Active" checked={!!form.is_active} onChange={f('is_active')} />
       <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} error={error} />
@@ -1073,9 +1083,111 @@ function FeedbackTab() {
   )
 }
 
+// ── ARTICLES tab ─────────────────────────────────────────────────────────────
+const emptyArticle = { title: '', body: '', photo_url: '', url: '', is_active: true }
+
+function ArticleForm({ form, setForm, onSave, onCancel, saving, error }) {
+  const f = key => val => setForm(prev => ({ ...prev, [key]: val }))
+  return (
+    <div className="flex flex-col gap-3">
+      <Field label="Title" value={form.title} onChange={f('title')} required />
+      <Field label="Body / Content" value={form.body || ''} onChange={f('body')} as="textarea" placeholder="Paste article text here…" />
+      <PhotoUpload label="Photo (optional)" value={form.photo_url || ''} onChange={f('photo_url')} />
+      <Field label="Link URL (optional)" value={form.url || ''} onChange={f('url')} type="url" placeholder="https://…" />
+      <Checkbox label="Active (visible to users)" checked={!!form.is_active} onChange={f('is_active')} />
+      <SaveBar onSave={onSave} onCancel={onCancel} saving={saving} error={error} />
+    </div>
+  )
+}
+
+function ArticlesTab() {
+  const [rows, setRows] = useState(null)
+  const [version, setVersion] = useState(0)
+  const [addOpen, setAddOpen] = useState(false)
+  const [editId, setEditId] = useState(null)
+  const [form, setForm] = useState(emptyArticle)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
+
+  useEffect(() => {
+    supabase.from('articles').select('*').order('created_at', { ascending: false })
+      .then(({ data }) => setRows(data || []))
+  }, [version])
+
+  const reload = () => setVersion(v => v + 1)
+
+  async function toggleActive(row) {
+    await supabase.from('articles').update({ is_active: !row.is_active }).eq('id', row.id)
+    setRows(prev => prev ? prev.map(r => r.id === row.id ? { ...r, is_active: !r.is_active } : r) : prev)
+  }
+
+  async function saveEdit() {
+    if (!form.title.trim()) return
+    setSaving(true); setSaveError(null)
+    const { error: err } = await supabase.from('articles').update(form).eq('id', editId)
+    setSaving(false)
+    if (err) { setSaveError(err.message); return }
+    setEditId(null)
+    reload()
+  }
+
+  async function saveAdd() {
+    if (!form.title.trim()) return
+    setSaving(true); setSaveError(null)
+    const { error: err } = await supabase.from('articles').insert(form)
+    setSaving(false)
+    if (err) { setSaveError(err.message); return }
+    setAddOpen(false)
+    setForm(emptyArticle)
+    reload()
+  }
+
+  async function deleteRow(id) {
+    if (!confirm('Delete this article?')) return
+    await supabase.from('articles').delete().eq('id', id)
+    reload()
+  }
+
+  return (
+    <div>
+      <div className="flex justify-end mb-4">
+        <AddButton label="Add Article" onClick={() => { setAddOpen(o => !o); setEditId(null); setForm(emptyArticle) }} />
+      </div>
+      {addOpen && (
+        <AddPanel title="New Article">
+          <ArticleForm form={form} setForm={setForm} onSave={saveAdd} onCancel={() => { setAddOpen(false); setForm(emptyArticle); setSaveError(null) }} saving={saving} error={saveError} />
+        </AddPanel>
+      )}
+      {rows === null ? (
+        <p className="font-sans text-[13px] text-navy/40 py-6 text-center">Loading…</p>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {rows.map(row => (
+            <RowCard key={row.id} label={row.title}
+              sub={row.body ? row.body.slice(0, 60) + (row.body.length > 60 ? '…' : '') : null}
+              active={row.is_active}
+              onToggle={() => toggleActive(row)}
+              onEdit={() => { if (editId === row.id) { setEditId(null); setSaveError(null) } else { setEditId(row.id); setForm({ ...row }); setSaveError(null) } }}
+              onDelete={() => deleteRow(row.id)}
+            >
+              {editId === row.id && (
+                <FormPanel>
+                  <ArticleForm form={form} setForm={setForm} onSave={saveEdit} onCancel={() => { setEditId(null); setSaveError(null) }} saving={saving} error={saveError} />
+                </FormPanel>
+              )}
+            </RowCard>
+          ))}
+          {rows.length === 0 && <p className="font-sans text-[13px] text-navy/40 py-6 text-center">No articles yet. Add one above.</p>}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const TABS = [
   { id: 'members',    label: 'Members' },
   { id: 'events',     label: 'Events' },
+  { id: 'articles',   label: 'Articles' },
   { id: 'therapists', label: 'Therapists' },
   { id: 'crisis',     label: 'Crisis' },
   { id: 'fitness',    label: 'Fitness' },
@@ -1152,6 +1264,7 @@ export default function AdminDashboard() {
       <div className="max-w-3xl mx-auto px-4 py-6">
         {tab === 'members'    && <MembersTab />}
         {tab === 'events'     && <EventsTab />}
+        {tab === 'articles'   && <ArticlesTab />}
         {tab === 'therapists' && <TherapistsTab />}
         {tab === 'crisis'     && <CrisisTab />}
         {tab === 'fitness'    && <FitnessTab />}

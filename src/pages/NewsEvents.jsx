@@ -46,6 +46,22 @@ const ExternalLinkIcon = () => (
   </svg>
 )
 
+const NewsIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+    <path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/>
+  </svg>
+)
+
+function SectionDivider({ label }) {
+  return (
+    <div className="flex items-center gap-3 px-1">
+      <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-navy/30 font-semibold whitespace-nowrap">{label}</span>
+      <div className="flex-1 h-px" style={{ background: 'rgba(11,31,74,0.07)' }} />
+    </div>
+  )
+}
+
 function formatDate(dateStr) {
   if (!dateStr) return null
   const d = new Date(dateStr + 'T12:00:00') // noon local to avoid timezone-shift-to-prev-day
@@ -68,7 +84,6 @@ function EventCard({ event, index }) {
       className="rounded-2xl bg-white overflow-hidden"
       style={{ boxShadow: '0 2px 16px rgba(11,31,74,0.07)', opacity: past ? 0.65 : 1 }}
     >
-      {/* Cover photo */}
       {event.cover_image_url && (
         <div className="w-full h-44 overflow-hidden bg-navy/10">
           <img
@@ -80,14 +95,12 @@ function EventCard({ event, index }) {
         </div>
       )}
 
-      {/* No cover photo — navy accent bar only */}
       <div className="flex">
         <div
-          className="w-[3px] shrink-0 rounded-l-2xl"
+          className="w-[3px] shrink-0"
           style={{ backgroundColor: past ? 'rgba(11,31,74,0.25)' : '#C9A84C',
-                   borderRadius: event.cover_image_url ? '0' : undefined }}
+                   borderRadius: event.cover_image_url ? '0 0 0 1rem' : '1rem 0 0 1rem' }}
         />
-
         <div className="flex-1 min-w-0 p-4">
           {past && (
             <span
@@ -97,10 +110,7 @@ function EventCard({ event, index }) {
               Past event
             </span>
           )}
-
           <p className="font-sans font-semibold text-navy text-[15px] leading-snug">{event.title}</p>
-
-          {/* Date & time */}
           {(event.event_date || event.event_time) && (
             <div className="flex items-center gap-1.5 mt-2" style={{ color: past ? 'rgba(11,31,74,0.35)' : '#C9A84C' }}>
               <CalendarIcon />
@@ -109,32 +119,22 @@ function EventCard({ event, index }) {
               </span>
             </div>
           )}
-
-          {/* Location */}
           {event.location && (
             <div className="flex items-center gap-1.5 mt-1.5" style={{ color: 'rgba(11,31,74,0.4)' }}>
               <PinIcon />
               <span className="font-sans text-[12px]">{event.location}</span>
             </div>
           )}
-
-          {/* Description */}
           {event.description && (
             <p className="font-sans text-[13px] text-navy/55 leading-relaxed mt-3">{event.description}</p>
           )}
-
-          {/* Registration CTA */}
           {event.registration_url && !past && (
             <a
               href={event.registration_url}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 font-sans text-[12px] font-semibold mt-3 active:scale-[0.97]"
-              style={{
-                backgroundColor: '#C9A84C',
-                color: '#0B1F4A',
-                transition: 'transform 0.15s cubic-bezier(0.32,0.72,0,1)',
-              }}
+              style={{ backgroundColor: '#C9A84C', color: '#0B1F4A', transition: 'transform 0.15s cubic-bezier(0.32,0.72,0,1)' }}
             >
               Register <ExternalLinkIcon />
             </a>
@@ -145,26 +145,81 @@ function EventCard({ event, index }) {
   )
 }
 
+function ArticleCard({ article, index }) {
+  const ref = useReveal(index * 70)
+
+  return (
+    <div
+      ref={ref}
+      className="rounded-2xl bg-white overflow-hidden"
+      style={{ boxShadow: '0 2px 16px rgba(11,31,74,0.07)' }}
+    >
+      {article.photo_url && (
+        <div className="w-full h-44 overflow-hidden bg-navy/10">
+          <img
+            src={article.photo_url}
+            alt={article.title}
+            className="w-full h-full object-cover"
+            onError={e => { e.target.parentElement.style.display = 'none' }}
+          />
+        </div>
+      )}
+
+      <div className="flex">
+        <div
+          className="w-[3px] shrink-0"
+          style={{ backgroundColor: '#2563A8',
+                   borderRadius: article.photo_url ? '0 0 0 1rem' : '1rem 0 0 1rem' }}
+        />
+        <div className="flex-1 min-w-0 p-4">
+          <div className="flex items-center gap-1.5 mb-2" style={{ color: '#2563A8' }}>
+            <NewsIcon />
+            <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.15em]">News</span>
+          </div>
+          <p className="font-sans font-semibold text-navy text-[15px] leading-snug">{article.title}</p>
+          {article.body && (
+            <p className="font-sans text-[13px] text-navy/55 leading-relaxed mt-3 whitespace-pre-line">{article.body}</p>
+          )}
+          {article.url && (
+            <a
+              href={article.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 font-sans text-[12px] font-semibold mt-3 active:scale-[0.97]"
+              style={{ backgroundColor: 'rgba(37,99,168,0.1)', color: '#2563A8', transition: 'transform 0.15s cubic-bezier(0.32,0.72,0,1)' }}
+            >
+              Read more <ExternalLinkIcon />
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function NewsEvents() {
   const headerRef = useReveal(0)
-  const [events, setEvents] = useState(null)
-  const [error, setError] = useState(null)
+  const [events, setEvents]     = useState(null)
+  const [articles, setArticles] = useState(null)
+  const [error, setError]       = useState(null)
 
   useEffect(() => {
-    supabase
-      .from('events')
-      .select('*')
-      .eq('is_active', true)
-      .order('event_date', { ascending: true })
-      .then(({ data, error: err }) => {
-        if (err) { setError(err.message); return }
-        setEvents(data || [])
-      })
+    // Fetch events and articles in parallel
+    Promise.all([
+      supabase.from('events').select('*').eq('is_active', true).order('event_date', { ascending: true }),
+      supabase.from('articles').select('*').eq('is_active', true).order('created_at', { ascending: false }),
+    ]).then(([evRes, arRes]) => {
+      if (evRes.error) { setError(evRes.error.message); return }
+      if (arRes.error) { setError(arRes.error.message); return }
+      setEvents(evRes.data || [])
+      setArticles(arRes.data || [])
+    })
   }, [])
 
-  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const loading  = events === null || articles === null
   const upcoming = (events || []).filter(e => !isPast(e.event_date) || !e.event_date)
   const past     = (events || []).filter(e => isPast(e.event_date))
+  const hasContent = (events || []).length > 0 || (articles || []).length > 0
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-cream">
@@ -203,11 +258,10 @@ export default function NewsEvents() {
 
       <div className="flex flex-col gap-3 px-4 pt-5 pb-24">
 
-        {/* Loading */}
-        {events === null && !error && Array.from({ length: 2 }).map((_, i) => <SkeletonCard key={i} />)}
-        {error && <ErrorState message="Unable to load events. Please try again." />}
+        {loading && !error && Array.from({ length: 2 }).map((_, i) => <SkeletonCard key={i} />)}
+        {error && <ErrorState message="Unable to load news and events. Please try again." />}
 
-        {events !== null && events.length === 0 && (
+        {!loading && !hasContent && (
           <div
             className="rounded-[1.25rem] p-[5px]"
             style={{ background: 'rgba(11,31,74,0.04)', border: '1px solid rgba(11,31,74,0.07)' }}
@@ -220,19 +274,24 @@ export default function NewsEvents() {
           </div>
         )}
 
-        {/* Upcoming events */}
-        {upcoming.length > 0 && (
+        {/* News articles */}
+        {!loading && articles && articles.length > 0 && (
           <>
-            <div className="flex items-center gap-3 px-1">
-              <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-navy/30 font-semibold whitespace-nowrap">Upcoming</span>
-              <div className="flex-1 h-px" style={{ background: 'rgba(11,31,74,0.07)' }} />
-            </div>
+            <SectionDivider label="News" />
+            {articles.map((a, i) => <ArticleCard key={a.id} article={a} index={i} />)}
+          </>
+        )}
+
+        {/* Upcoming events */}
+        {!loading && upcoming.length > 0 && (
+          <>
+            <SectionDivider label="Upcoming Events" />
             {upcoming.map((e, i) => <EventCard key={e.id} event={e} index={i} />)}
           </>
         )}
 
         {/* Past events */}
-        {past.length > 0 && (
+        {!loading && past.length > 0 && (
           <>
             <div className="flex items-center gap-3 px-1 mt-2">
               <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-navy/30 font-semibold whitespace-nowrap">Past Events</span>

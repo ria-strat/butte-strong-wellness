@@ -170,6 +170,15 @@ function TeamCard({ member, index }) {
   )
 }
 
+function SectionDivider({ label }) {
+  return (
+    <div className="flex items-center gap-3 px-1 mt-2">
+      <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-navy/30 font-semibold whitespace-nowrap">{label}</span>
+      <div className="flex-1 h-px" style={{ background: 'rgba(11,31,74,0.07)' }} />
+    </div>
+  )
+}
+
 export default function About() {
   const headerRef = useReveal(0)
   const overviewRef = useReveal(80)
@@ -190,6 +199,9 @@ export default function About() {
     }
     fetchTeam()
   }, [])
+
+  const staff    = team.filter(m => m.member_type === 'staff')
+  const contacts = team.filter(m => m.member_type !== 'staff')
 
   return (
     <>
@@ -244,17 +256,28 @@ export default function About() {
             </div>
           </div>
 
-          {/* Team section */}
-          <div className="flex items-center gap-3 px-1 mt-2">
-            <span className="font-sans text-[10px] uppercase tracking-[0.2em] text-navy/30 font-semibold whitespace-nowrap">Wellness Unit Team</span>
-            <div className="flex-1 h-px" style={{ background: 'rgba(11,31,74,0.07)' }} />
-          </div>
-
           {loading && Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)}
           {error && <ErrorState message="Unable to load team information. Please try again." />}
-          {!loading && !error && team.map((member, i) => (
-            <TeamCard key={member.id} member={member} index={i} />
-          ))}
+
+          {!loading && !error && (
+            <>
+              {/* Wellness Unit Staff */}
+              <SectionDivider label="Wellness Unit Staff" />
+              {staff.map((member, i) => (
+                <TeamCard key={member.id} member={member} index={i} />
+              ))}
+
+              {/* Agency Contacts */}
+              {contacts.length > 0 && (
+                <>
+                  <SectionDivider label="Agency Contacts" />
+                  {contacts.map((member, i) => (
+                    <TeamCard key={member.id} member={member} index={staff.length + i} />
+                  ))}
+                </>
+              )}
+            </>
+          )}
 
         </div>
       </div>

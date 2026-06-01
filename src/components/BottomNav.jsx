@@ -60,7 +60,7 @@ export default function BottomNav() {
             <>
               <span
                 style={{
-                  color: isActive ? '#0B1F4A' : 'rgba(11,31,74,0.3)',
+                  color: isActive ? '#0B1F4A' : 'rgba(11,31,74,0.5)',
                   transition: 'color 0.2s cubic-bezier(0.32,0.72,0,1)',
                 }}
               >
@@ -69,7 +69,7 @@ export default function BottomNav() {
               <span
                 className="font-sans text-[10px] font-medium"
                 style={{
-                  color: isActive ? '#0B1F4A' : 'rgba(11,31,74,0.3)',
+                  color: isActive ? '#0B1F4A' : 'rgba(11,31,74,0.5)',
                   transition: 'color 0.2s cubic-bezier(0.32,0.72,0,1)',
                 }}
               >

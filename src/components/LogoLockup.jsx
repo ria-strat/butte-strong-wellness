@@ -38,7 +38,7 @@ export default function LogoLockup({ dark = true, size = 54 }) {
           lineHeight: 1,
           letterSpacing: '0.04em',
         }}>
-          Wellness
+          Wellness Unit
         </span>
         <span style={{
           fontFamily: "'DM Sans', sans-serif",
