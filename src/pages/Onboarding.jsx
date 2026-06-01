@@ -1,17 +1,5 @@
 import { useState } from 'react'
-
-const AGENCIES = [
-  'Butte County Sheriff\'s Office',
-  'CAL FIRE',
-  'Oroville Fire Department',
-  'Chico Fire Department',
-  'Paradise Fire Department',
-  'Chico Police Department',
-  'Paradise Police Department',
-  'Biggs-Gridley Fire District',
-  'Cal OES / State Agency',
-  'Family Member / Civilian Support',
-]
+import { AGENCIES } from '../lib/agencies'
 
 export default function Onboarding({ onComplete }) {
   const [selected, setSelected] = useState(null)

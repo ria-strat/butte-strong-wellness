@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { AGENCIES } from '../lib/agencies'
 import LogoMark from '../assets/LogoMark'
 
 // ── Shared input style ─────────────────────────────────────────────────────────
@@ -69,11 +70,12 @@ function SignInForm({ onForgotPassword }) {
 
 // ── Create Account ─────────────────────────────────────────────────────────────
 function CreateAccountForm() {
-  const [step, setStep]         = useState(1)   // 1 = access code, 2 = email+password
+  const [step, setStep]         = useState(1)   // 1 = access code, 2 = email+password+agency
   const [code, setCode]         = useState('')
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm]   = useState('')
+  const [agency, setAgency]     = useState('')
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState(null)
   const [success, setSuccess]   = useState(false)
@@ -97,7 +99,11 @@ function CreateAccountForm() {
     if (password !== confirm) { setError('Passwords do not match.'); return }
     if (password.length < 8)  { setError('Password must be at least 8 characters.'); return }
     setLoading(true); setError(null)
-    const { error: err } = await supabase.auth.signUp({ email, password })
+    const { error: err } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { agency: agency || null } },
+    })
     setLoading(false)
     if (err) { setError(err.message); return }
     setSuccess(true)
@@ -177,6 +183,22 @@ function CreateAccountForm() {
         onChange={setPassword} placeholder="••••••••" autoComplete="new-password" />
       <Field label="Confirm Password" type="password" value={confirm}
         onChange={setConfirm} placeholder="••••••••" autoComplete="new-password" />
+
+      {/* Agency selector */}
+      <div className="flex flex-col gap-1.5">
+        <label className="font-sans text-[10px] uppercase tracking-[0.2em] text-cream/40 font-semibold">
+          Agency <span className="normal-case tracking-normal text-cream/25">(optional)</span>
+        </label>
+        <select
+          value={agency}
+          onChange={e => setAgency(e.target.value)}
+          className={inputCls}
+          style={{ ...inputStyle, color: agency ? '#F4F2EE' : 'rgba(244,242,238,0.25)' }}
+        >
+          <option value="">Select your agency…</option>
+          {AGENCIES.map(a => <option key={a} value={a}>{a}</option>)}
+        </select>
+      </div>
 
       {error && <p className="font-sans text-[12px] text-red-400 -mt-1">{error}</p>}
 

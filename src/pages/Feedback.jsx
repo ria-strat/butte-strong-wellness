@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { AGENCIES } from '../lib/agencies'
 
 function useReveal(delay = 0) {
   const ref = useRef(null)
@@ -25,18 +26,6 @@ function useReveal(delay = 0) {
   return ref
 }
 
-const AGENCIES = [
-  'Butte County Sheriff\'s Office (BCSO)',
-  'Chico Police Department (CPD)',
-  'Chico Fire Department (CFD)',
-  'Oroville Police Department (OPD)',
-  'Butte County Probation (BCP)',
-  'Butte EMS',
-  'CAL FIRE',
-  'Paradise Police Department (PPD)',
-  'CSU Chico Police (UPD)',
-  'Other / Prefer not to say',
-]
 
 export default function Feedback() {
   const headerRef = useReveal(0)
