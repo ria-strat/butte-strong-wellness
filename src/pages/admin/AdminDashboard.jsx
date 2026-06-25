@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { AGENCIES } from '../../lib/agencies'
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 const PlusIcon = () => (
@@ -1184,15 +1185,205 @@ function ArticlesTab() {
   )
 }
 
+// ── NOTIFICATIONS tab ─────────────────────────────────────────────────────────
+const ROLES = ['Sworn Staff', 'Civilian Staff', 'Family Member']
+
+function NotificationsTab() {
+  const [title,          setTitle]          = useState('')
+  const [message,        setMessage]        = useState('')
+  const [targetAgency,   setTargetAgency]   = useState('')   // '' = all
+  const [targetRole,     setTargetRole]     = useState('')   // '' = all
+  const [sending,        setSending]        = useState(false)
+  const [sendResult,     setSendResult]     = useState(null) // { ok, msg }
+  const [log,            setLog]            = useState([])
+  const [loadingLog,     setLoadingLog]     = useState(true)
+
+  useEffect(() => {
+    supabase
+      .from('notification_log')
+      .select('*')
+      .order('sent_at', { ascending: false })
+      .limit(20)
+      .then(({ data }) => { setLog(data ?? []); setLoadingLog(false) })
+  }, [sendResult])
+
+  async function handleSend() {
+    if (!title.trim() || !message.trim()) return
+    setSending(true); setSendResult(null)
+
+    try {
+      // Fetch credentials server-side (admin-only RPC)
+      const { data: appId,  error: e1 } = await supabase.rpc('get_setting_for_admin', { p_key: 'onesignal_app_id'  })
+      const { data: apiKey, error: e2 } = await supabase.rpc('get_setting_for_admin', { p_key: 'onesignal_api_key' })
+
+      if (e1 || e2 || !appId || !apiKey) {
+        setSendResult({ ok: false, msg: 'OneSignal credentials not set. Add them in Supabase → SQL Editor.' })
+        setSending(false); return
+      }
+
+      // Build OneSignal payload
+      const body = {
+        app_id:   appId,
+        headings: { en: title.trim() },
+        contents: { en: message.trim() },
+      }
+
+      if (targetAgency || targetRole) {
+        const filters = []
+        if (targetAgency) filters.push({ field: 'tag', key: 'agency',     relation: '=', value: targetAgency })
+        if (targetAgency && targetRole) filters.push({ operator: 'AND' })
+        if (targetRole)   filters.push({ field: 'tag', key: 'staff_type', relation: '=', value: targetRole  })
+        body.filters = filters
+      } else {
+        body.included_segments = ['All']
+      }
+
+      const res  = await fetch('https://onesignal.com/api/v1/notifications', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${apiKey}` },
+        body:    JSON.stringify(body),
+      })
+      const json = await res.json()
+
+      if (!res.ok || json.errors) {
+        setSendResult({ ok: false, msg: json.errors?.[0] ?? 'OneSignal returned an error.' })
+        setSending(false); return
+      }
+
+      // Log to DB
+      const { data: { user } } = await supabase.auth.getUser()
+      await supabase.from('notification_log').insert({
+        title:         title.trim(),
+        message:       message.trim(),
+        target_agency: targetAgency || null,
+        target_role:   targetRole   || null,
+        sent_by:       user?.id,
+      })
+
+      setSendResult({ ok: true, msg: `Sent! ${json.recipients ?? 0} device(s) targeted.` })
+      setTitle(''); setMessage('')
+    } catch (err) {
+      setSendResult({ ok: false, msg: err.message ?? 'Unexpected error. Check your internet connection.' })
+    }
+    setSending(false)
+  }
+
+  const audienceLabel = (() => {
+    if (!targetAgency && !targetRole) return 'Everyone'
+    if (targetAgency && targetRole)   return `${targetAgency} · ${targetRole}`
+    return targetAgency || targetRole
+  })()
+
+  return (
+    <div className="flex flex-col gap-6 pb-16">
+
+      {/* Compose */}
+      <div className="bg-white rounded-2xl p-5 flex flex-col gap-4" style={{ boxShadow: '0 2px 16px rgba(11,31,74,0.07)' }}>
+        <h2 className="font-display text-navy uppercase tracking-wide text-[1.4rem]">Send a Notification</h2>
+
+        {/* Audience */}
+        <div className="flex flex-col gap-1.5">
+          <label className="font-sans text-[11px] font-semibold uppercase tracking-wide text-navy/40">Audience</label>
+          <div className="grid grid-cols-2 gap-2">
+            <select
+              value={targetAgency}
+              onChange={e => setTargetAgency(e.target.value)}
+              className="rounded-xl border border-navy/10 px-3 py-2.5 font-sans text-[13px] text-navy bg-white cursor-pointer"
+              style={{ appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%230B1F4A' opacity='.3'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}>
+              <option value="">All Agencies</option>
+              {AGENCIES.map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
+            <select
+              value={targetRole}
+              onChange={e => setTargetRole(e.target.value)}
+              className="rounded-xl border border-navy/10 px-3 py-2.5 font-sans text-[13px] text-navy bg-white cursor-pointer"
+              style={{ appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%230B1F4A' opacity='.3'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}>
+              <option value="">All Roles</option>
+              {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+          <p className="font-sans text-[11px] text-navy/40 mt-0.5">Sending to: <strong className="text-navy/70">{audienceLabel}</strong></p>
+        </div>
+
+        {/* Title */}
+        <div className="flex flex-col gap-1.5">
+          <label className="font-sans text-[11px] font-semibold uppercase tracking-wide text-navy/40">Notification Title</label>
+          <input
+            value={title} onChange={e => setTitle(e.target.value)} maxLength={80} placeholder="e.g. Wellness Reminder"
+            className="rounded-xl border border-navy/10 px-4 py-2.5 font-sans text-[14px] text-navy placeholder:text-navy/25 focus:outline-none focus:border-gold"
+          />
+        </div>
+
+        {/* Message */}
+        <div className="flex flex-col gap-1.5">
+          <label className="font-sans text-[11px] font-semibold uppercase tracking-wide text-navy/40">Message</label>
+          <textarea
+            value={message} onChange={e => setMessage(e.target.value)} rows={4} maxLength={500}
+            placeholder="e.g. Don't forget to check in with your peer support team this week."
+            className="rounded-xl border border-navy/10 px-4 py-2.5 font-sans text-[14px] text-navy placeholder:text-navy/25 focus:outline-none focus:border-gold resize-none"
+          />
+          <p className="font-sans text-[10px] text-navy/30 self-end">{message.length}/500</p>
+        </div>
+
+        {/* Result */}
+        {sendResult && (
+          <div className="rounded-xl px-4 py-3 font-sans text-[13px]"
+            style={{ backgroundColor: sendResult.ok ? 'rgba(26,138,114,0.08)' : 'rgba(200,50,50,0.07)', color: sendResult.ok ? '#1A8A72' : '#c23232' }}>
+            {sendResult.msg}
+          </div>
+        )}
+
+        <button onClick={handleSend} disabled={sending || !title.trim() || !message.trim()}
+          className="rounded-full px-6 py-3 font-sans text-[13px] font-semibold cursor-pointer disabled:opacity-40 transition-opacity self-start"
+          style={{ backgroundColor: '#0B1F4A', color: '#C9A84C' }}>
+          {sending ? 'Sending…' : 'Send Notification'}
+        </button>
+      </div>
+
+      {/* Log */}
+      <div className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={{ boxShadow: '0 2px 16px rgba(11,31,74,0.07)' }}>
+        <h2 className="font-sans font-semibold text-navy text-[15px]">Recent Sends</h2>
+        {loadingLog ? (
+          <p className="font-sans text-[13px] text-navy/30">Loading…</p>
+        ) : log.length === 0 ? (
+          <p className="font-sans text-[13px] text-navy/30">No notifications sent yet.</p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {log.map(entry => (
+              <div key={entry.id} className="flex flex-col gap-0.5 pb-3" style={{ borderBottom: '1px solid rgba(11,31,74,0.06)' }}>
+                <p className="font-sans font-semibold text-[13px] text-navy">{entry.title}</p>
+                <p className="font-sans text-[12px] text-navy/60">{entry.message}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="font-sans text-[10px] text-navy/35">
+                    {new Date(entry.sent_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                  {(entry.target_agency || entry.target_role) && (
+                    <Badge label={[entry.target_agency, entry.target_role].filter(Boolean).join(' · ')} color="#2563A8" />
+                  )}
+                  {!entry.target_agency && !entry.target_role && (
+                    <Badge label="Everyone" color="#1A8A72" />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+    </div>
+  )
+}
+
 const TABS = [
-  { id: 'members',    label: 'Members' },
-  { id: 'events',     label: 'Events' },
-  { id: 'articles',   label: 'Articles' },
-  { id: 'therapists', label: 'Therapists' },
-  { id: 'crisis',     label: 'Crisis' },
-  { id: 'fitness',    label: 'Fitness' },
-  { id: 'team',       label: 'Team' },
-  { id: 'feedback',   label: 'Feedback' },
+  { id: 'members',       label: 'Members' },
+  { id: 'events',        label: 'Events' },
+  { id: 'articles',      label: 'Articles' },
+  { id: 'therapists',    label: 'Therapists' },
+  { id: 'crisis',        label: 'Crisis' },
+  { id: 'fitness',       label: 'Fitness' },
+  { id: 'team',          label: 'Team' },
+  { id: 'feedback',      label: 'Feedback' },
+  { id: 'notifications', label: 'Notifications' },
 ]
 
 // ── MAIN DASHBOARD ───────────────────────────────────────────────────────────
@@ -1287,14 +1478,15 @@ export default function AdminDashboard() {
 
       {/* Content */}
       <div className="max-w-3xl mx-auto px-4 py-6">
-        {tab === 'members'    && <MembersTab />}
-        {tab === 'events'     && <EventsTab />}
-        {tab === 'articles'   && <ArticlesTab />}
-        {tab === 'therapists' && <TherapistsTab />}
-        {tab === 'crisis'     && <CrisisTab />}
-        {tab === 'fitness'    && <FitnessTab />}
-        {tab === 'team'       && <TeamTab />}
-        {tab === 'feedback'   && <FeedbackTab />}
+        {tab === 'members'       && <MembersTab />}
+        {tab === 'events'        && <EventsTab />}
+        {tab === 'articles'      && <ArticlesTab />}
+        {tab === 'therapists'    && <TherapistsTab />}
+        {tab === 'crisis'        && <CrisisTab />}
+        {tab === 'fitness'       && <FitnessTab />}
+        {tab === 'team'          && <TeamTab />}
+        {tab === 'feedback'      && <FeedbackTab />}
+        {tab === 'notifications' && <NotificationsTab />}
       </div>
     </div>
   )
