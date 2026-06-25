@@ -27,9 +27,12 @@ workflows:
           npx cap add ios
           npx cap sync ios
 
-      - name: Inject Info.plist privacy strings
+      - name: Inject Info.plist privacy strings and build number
         script: |
           PLIST="ios/App/App/Info.plist"
+          # Use Codemagic's auto-incrementing build number so each upload is unique
+          plutil -replace CFBundleVersion -string "$BUILD_NUMBER" "$PLIST"
+          # Required privacy strings
           plutil -insert NSLocationWhenInUseUsageDescription -string "This app does not use your location." "$PLIST" 2>/dev/null || true
           plutil -insert NSLocationAlwaysAndWhenInUseUsageDescription -string "This app does not use your location." "$PLIST" 2>/dev/null || true
           plutil -insert NSCameraUsageDescription -string "This app does not use your camera." "$PLIST" 2>/dev/null || true
