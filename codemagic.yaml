@@ -8,8 +8,7 @@ workflows:
       node: 22
       xcode: latest
       groups:
-        - apple_credentials     # APPLE_ID, APP_SPECIFIC_PASSWORD
-        - certificate_credentials  # CERTIFICATE_PRIVATE_KEY
+        - manual_signing  # CM_CERTIFICATE, CM_CERTIFICATE_PASSWORD, CM_PROVISIONING_PROFILE
       vars:
         BUNDLE_ID: com.buttestrongwellness.app
         APPLE_TEAM_ID: DJAXSSFY8H
@@ -31,13 +30,12 @@ workflows:
       - name: Set up keychain and signing
         script: |
           keychain initialize
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --team-id "$APPLE_TEAM_ID" \
-            --create \
-            --apple-id "$APPLE_ID" \
-            --password "$APP_SPECIFIC_PASSWORD"
-          keychain add-certificates
+          # Import distribution certificate
+          echo "$CM_CERTIFICATE" | base64 --decode > /tmp/cert.p12
+          keychain add-certificates --certificate /tmp/cert.p12 --certificate-password "$CM_CERTIFICATE_PASSWORD"
+          # Install provisioning profile
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          echo "$CM_PROVISIONING_PROFILE" | base64 --decode > "$HOME/Library/MobileDevice/Provisioning Profiles/profile.mobileprovision"
           xcode-project use-profiles
 
       - name: Build IPA
