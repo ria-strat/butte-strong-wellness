@@ -27,6 +27,15 @@ workflows:
           npx cap add ios
           npx cap sync ios
 
+      - name: Inject Info.plist privacy strings
+        script: |
+          PLIST="ios/App/App/Info.plist"
+          plutil -insert NSLocationWhenInUseUsageDescription -string "This app does not use your location." "$PLIST" 2>/dev/null || true
+          plutil -insert NSLocationAlwaysAndWhenInUseUsageDescription -string "This app does not use your location." "$PLIST" 2>/dev/null || true
+          plutil -insert NSCameraUsageDescription -string "This app does not use your camera." "$PLIST" 2>/dev/null || true
+          plutil -insert NSPhotoLibraryUsageDescription -string "This app does not use your photo library." "$PLIST" 2>/dev/null || true
+          plutil -insert NSMicrophoneUsageDescription -string "This app does not use your microphone." "$PLIST" 2>/dev/null || true
+
       - name: Set up keychain and signing
         script: |
           keychain initialize
