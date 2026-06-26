@@ -43,6 +43,9 @@ workflows:
           sips -z 120  120  "$ICON_SRC" --out "$ICON_DIR/icon-40@3x.png"
           sips -z 120  120  "$ICON_SRC" --out "$ICON_DIR/icon-60@2x.png"
           sips -z 180  180  "$ICON_SRC" --out "$ICON_DIR/icon-60@3x.png"
+          sips -z 76   76   "$ICON_SRC" --out "$ICON_DIR/icon-76.png"
+          sips -z 152  152  "$ICON_SRC" --out "$ICON_DIR/icon-76@2x.png"
+          sips -z 167  167  "$ICON_SRC" --out "$ICON_DIR/icon-83.5@2x.png"
           sips -z 1024 1024 "$ICON_SRC" --out "$ICON_DIR/icon-1024.png"
           cat > "$ICON_DIR/Contents.json" << 'CONTENTS'
           {
@@ -58,6 +61,15 @@ workflows:
               {"idiom":"iphone","scale":"3x","size":"40x40","filename":"icon-40@3x.png"},
               {"idiom":"iphone","scale":"2x","size":"60x60","filename":"icon-60@2x.png"},
               {"idiom":"iphone","scale":"3x","size":"60x60","filename":"icon-60@3x.png"},
+              {"idiom":"ipad","scale":"1x","size":"20x20","filename":"icon-20.png"},
+              {"idiom":"ipad","scale":"2x","size":"20x20","filename":"icon-20@2x.png"},
+              {"idiom":"ipad","scale":"1x","size":"29x29","filename":"icon-29.png"},
+              {"idiom":"ipad","scale":"2x","size":"29x29","filename":"icon-29@2x.png"},
+              {"idiom":"ipad","scale":"1x","size":"40x40","filename":"icon-40.png"},
+              {"idiom":"ipad","scale":"2x","size":"40x40","filename":"icon-40@2x.png"},
+              {"idiom":"ipad","scale":"1x","size":"76x76","filename":"icon-76.png"},
+              {"idiom":"ipad","scale":"2x","size":"76x76","filename":"icon-76@2x.png"},
+              {"idiom":"ipad","scale":"2x","size":"83.5x83.5","filename":"icon-83.5@2x.png"},
               {"idiom":"ios-marketing","scale":"1x","size":"1024x1024","filename":"icon-1024.png"}
             ],
             "info": {"author":"xcode","version":1}
