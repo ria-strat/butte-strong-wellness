@@ -121,7 +121,9 @@ workflows:
   android-google-play:
     name: Butte Strong Wellness — Android Google Play
     max_build_duration: 60
-    instance_type: linux_x2
+    # Same Mac instance the iOS workflow uses — Android builds fine on macOS,
+    # and linux_x2 isn't included in the current Codemagic billing plan.
+    instance_type: mac_mini_m2
 
     environment:
       node: 22
