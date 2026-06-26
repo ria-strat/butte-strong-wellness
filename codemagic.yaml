@@ -117,3 +117,110 @@ workflows:
         notify:
           success: true
           failure: true
+
+  android-google-play:
+    name: Butte Strong Wellness — Android Google Play
+    max_build_duration: 60
+    instance_type: linux_x2
+
+    environment:
+      node: 22
+      java: 21
+      # Codemagic injects CM_KEYSTORE_PATH, CM_KEYSTORE_PASSWORD, CM_KEY_ALIAS,
+      # CM_KEY_PASSWORD from the keystore stored under this reference name.
+      # Create it in: App settings → Code signing identities → Android keystores.
+      android_signing:
+        - buttestrong_keystore
+      vars:
+        PACKAGE_NAME: com.buttestrongwellness.app
+
+    scripts:
+      - name: Install npm dependencies
+        script: npm ci
+
+      - name: Build web app
+        script: npm run build
+
+      - name: Add and sync Capacitor Android
+        script: |
+          # android/ is not committed — it is generated fresh on every build
+          npx cap add android || true
+          npx cap sync android
+
+      - name: Generate Android app icons and splash
+        script: |
+          # @capacitor/assets builds adaptive launcher icons + splash from a single logo
+          mkdir -p assets
+          cp resources/icon.png assets/logo.png
+          npx @capacitor/assets@3 generate \
+            --android \
+            --iconBackgroundColor '#0B1F4A' \
+            --iconBackgroundColorDark '#0B1F4A' \
+            --splashBackgroundColor '#0B1F4A' \
+            --splashBackgroundColorDark '#0B1F4A' \
+            || echo "WARNING: icon generation failed — build will use default Capacitor icons"
+
+      - name: Inject version code and release signing config
+        script: |
+          # android/app/build.gradle is regenerated each build, so patch it at build time
+          python3 - <<'PY'
+          import os, re
+
+          path = "android/app/build.gradle"
+          with open(path) as f:
+              gradle = f.read()
+
+          # Auto-incrementing versionCode from Codemagic; keep versionName in sync with iOS (1.0)
+          build_number = os.environ.get("BUILD_NUMBER", "1")
+          gradle = re.sub(r'versionCode\s+\d+', f'versionCode {build_number}', gradle, count=1)
+          gradle = re.sub(r'versionName\s+"[^"]*"', 'versionName "1.0"', gradle, count=1)
+
+          # Release signing config that reads the keystore Codemagic injected via env vars
+          signing_block = '''
+              signingConfigs {
+                  release {
+                      storeFile file(System.getenv("CM_KEYSTORE_PATH"))
+                      storePassword System.getenv("CM_KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("CM_KEY_ALIAS")
+                      keyPassword System.getenv("CM_KEY_PASSWORD")
+                  }
+              }
+          '''
+          gradle = gradle.replace("android {", "android {\n" + signing_block, 1)
+
+          # Point the release build type at the signing config
+          gradle = re.sub(
+              r'(buildTypes\s*\{\s*release\s*\{)',
+              r'\1\n            signingConfig signingConfigs.release',
+              gradle, count=1)
+
+          with open(path, "w") as f:
+              f.write(gradle)
+
+          print("Patched build.gradle:")
+          print(gradle)
+          PY
+
+      - name: Build signed AAB
+        script: |
+          cd android
+          ./gradlew bundleRelease
+
+    artifacts:
+      - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/**/mapping.txt
+
+    publishing:
+      email:
+        recipients:
+          - tricerri@gmail.com
+        notify:
+          success: true
+          failure: true
+      # To auto-publish to Play later, add a Google Play service account JSON in
+      # Codemagic and uncomment below (first release for a new app must be
+      # uploaded manually via the Play Console):
+      # google_play:
+      #   credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+      #   track: internal
+      #   submit_as_draft: true
