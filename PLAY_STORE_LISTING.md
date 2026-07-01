@@ -101,10 +101,12 @@ Play Console → "Data safety". Answer based on what the app actually does:
 
 | Data type | Collected? | Why | Shared? | Optional? |
 |---|---|---|---|---|
+| Email address | Yes (ALL users — registration + recovery) | Account management | No | No (required to register) |
 | Name | Yes (feedback form — optional field) | App functionality | No | Yes |
-| Email address | Yes (admin staff login only) | Account management | No | No (for admins) |
 | App activity / other user-generated content | Yes (feedback messages) | App functionality | No | Yes |
 | Device or other IDs | Yes (push token via OneSignal) | App functionality — notifications | No (processed by OneSignal as a service provider) | Yes (user can decline notifications) |
+
+> Note: the app requires a login for **every** user (not just admins). Registration collects email, password, department, and role, and is gated by an org access code. So email is collected for all users, and "Account management" is a data-collection purpose.
 
 **Key answers:**
 - Is data encrypted in transit? **Yes** (HTTPS / Supabase + OneSignal both use TLS).
@@ -172,7 +174,10 @@ Questions? Email buttestrongwellness@gmail.com.
 ## 6. App content & release details
 
 - **Target audience & content:** Adults (18+) / first responder community. Not directed at children.
-- **App access:** Most content is open. The **/admin** area requires login — provide Google a test admin email + password in "App access" → "All or some functionality is restricted" so reviewers can see it.
+- **App access (CRITICAL — do not skip):** The ENTIRE app is behind a login, and registration requires an org access code the public doesn't have. Google reviewers cannot self-register, so if you don't give them a working account they will **reject the app for being inaccessible.** In **App content → App access**, select "All or some functionality is restricted" and provide:
+  - A pre-created test account: email + password that is already registered (create one in advance).
+  - Instructions noting the access code is only needed for *new* registration, and the provided account is already past that gate.
+  - (If reviewers must register themselves, also supply the current access code — but a ready-made login is safer.)
 - **Ads:** This app contains no ads → answer **No**.
 - **Government app:** This is affiliated with the Butte County Sheriff's Office. If you register the developer account as an organization/government entity, you may need to complete Google's government-app declaration. Confirm which Play developer account owns this.
 - **Release track:** Start with **Internal testing** (instant, up to 100 testers) → then **Closed/Open testing** → **Production**. The first production release for a brand-new app can take a few days to review.
