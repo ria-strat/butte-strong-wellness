@@ -14,6 +14,8 @@ workflows:
         APPLE_TEAM_ID: DJAXSSFY8H
         XCODE_PROJECT: ios/App/App.xcodeproj
         XCODE_SCHEME: App
+        VITE_SUPABASE_URL: https://cgnkqbyvlhqysbfilliz.supabase.co
+        VITE_SUPABASE_ANON_KEY: sb_publishable_iW682eGGFoWK6VkQPpa73w_70zb9L1A
 
     scripts:
       - name: Install npm dependencies
@@ -26,6 +28,8 @@ workflows:
         script: |
           npx cap add ios
           npx cap sync ios
+          # Restrict to iPhone only — app layout is phone-first, iPad not supported
+          sed -i '' 's/TARGETED_DEVICE_FAMILY = "1,2"/TARGETED_DEVICE_FAMILY = 1/g' ios/App/App.xcodeproj/project.pbxproj
 
       - name: Generate iOS app icons
         script: |
