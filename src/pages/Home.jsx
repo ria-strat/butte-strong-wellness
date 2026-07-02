@@ -142,7 +142,7 @@ export default function Home() {
       </div>
 
       {/* ── Body ── */}
-      <div className="flex flex-col gap-4 px-4 pt-5 pb-24">
+      <div className="flex flex-col gap-4 px-4 pt-5 pb-nav">
 
         {/* CTA — double-bezel card */}
         <div

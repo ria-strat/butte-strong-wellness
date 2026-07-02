@@ -28,6 +28,11 @@ html, body, #root {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Page content bottom padding — clears the bottom nav + iOS home indicator */
+@utility pb-nav {
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+}
+
 body {
   font-family: 'DM Sans', system-ui, sans-serif;
 }

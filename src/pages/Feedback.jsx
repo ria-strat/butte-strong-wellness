@@ -96,7 +96,7 @@ export default function Feedback() {
       </div>
 
       {/* Form */}
-      <div className="px-4 pt-5 pb-24">
+      <div className="px-4 pt-5 pb-nav">
 
         {status === 'success' ? (
           <div

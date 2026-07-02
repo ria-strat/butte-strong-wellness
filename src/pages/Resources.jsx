@@ -170,7 +170,7 @@ export default function Resources() {
       </div>
 
       {/* List */}
-      <div className="flex flex-col gap-3 px-4 pt-5 pb-24">
+      <div className="flex flex-col gap-3 px-4 pt-5 pb-nav">
 
         {/* Get Help Now — always at the top */}
         <Link

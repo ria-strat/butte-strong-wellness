@@ -219,7 +219,7 @@ export default function FamilyResources() {
         />
       </div>
 
-      <div className="flex flex-col gap-3 px-4 pt-5 pb-24">
+      <div className="flex flex-col gap-3 px-4 pt-5 pb-nav">
         {RESOURCES.map((r, i) => (
           <ResourceCard key={r.id} resource={r} index={i} />
         ))}
@@ -234,7 +234,7 @@ export default function FamilyResources() {
           name="Mandy Barrow"
           role="Family Engagement Specialist"
           phone="(949) 338-4553"
-          email="mandyjoybarrow@yahoo.com"
+          email="buttestrongwellness@gmail.com"
           index={RESOURCES.length}
         />
       </div>

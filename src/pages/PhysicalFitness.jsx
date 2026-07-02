@@ -278,7 +278,7 @@ export default function PhysicalFitness() {
         </div>
 
         {/* Category list */}
-        <div className="flex flex-col gap-3 px-4 pt-5 pb-24">
+        <div className="flex flex-col gap-3 px-4 pt-5 pb-nav">
           {loading && Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)}
           {error && <ErrorState message="Unable to load fitness resources. Please try again." />}
           {!loading && !error && categories.map((cat, i) => (

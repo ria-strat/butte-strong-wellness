@@ -253,7 +253,7 @@ export default function MindsetResilience() {
           <div className="absolute bottom-0 left-6 right-6 h-px" style={{ background: `linear-gradient(90deg, transparent 0%, ${ACCENT} 40%, ${ACCENT} 60%, transparent 100%)`, opacity: 0.35 }} />
         </div>
 
-        <div className="flex flex-col gap-3 px-4 pt-5 pb-24">
+        <div className="flex flex-col gap-3 px-4 pt-5 pb-nav">
 
           <div ref={introRef} className="rounded-[1.25rem] p-[5px]" style={{ background: 'rgba(11,31,74,0.04)', border: '1px solid rgba(11,31,74,0.07)' }}>
             <div className="rounded-[calc(1.25rem-5px)] bg-white px-5 py-4" style={{ boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.9)' }}>

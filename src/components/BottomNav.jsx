@@ -40,15 +40,16 @@ const tabs = [
 export default function BottomNav() {
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around"
+      className="fixed bottom-0 left-0 right-0 z-40"
       style={{
-        height: '60px',
+        paddingBottom: 'env(safe-area-inset-bottom)',
         backgroundColor: 'rgba(255,255,255,0.97)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         borderTop: '1px solid rgba(11,31,74,0.08)',
       }}
     >
+      <div className="flex items-center justify-around" style={{ height: '60px' }}>
       {tabs.map(({ to, label, Icon }) => (
         <NavLink
           key={to}
@@ -86,6 +87,7 @@ export default function BottomNav() {
           )}
         </NavLink>
       ))}
+      </div>
     </nav>
   )
 }
