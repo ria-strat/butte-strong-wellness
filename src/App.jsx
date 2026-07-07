@@ -8,6 +8,7 @@ import Login         from './pages/Login'
 import ResetPassword from './pages/ResetPassword'
 import Onboarding    from './pages/Onboarding'
 import Privacy       from './pages/Privacy'
+import DeleteAccount from './pages/DeleteAccount'
 import Home          from './pages/Home'
 import PeerSupport   from './pages/PeerSupport'
 import PhysicalFitness    from './pages/PhysicalFitness'
@@ -50,9 +51,14 @@ function AppShell() {
     )
   }
 
-  // Privacy policy is always public (required by app stores)
-  if (location.pathname === '/privacy') {
-    return <Routes><Route path="/privacy" element={<Privacy />} /></Routes>
+  // Privacy policy + account deletion are always public (required by app stores)
+  if (location.pathname === '/privacy' || location.pathname === '/delete-account') {
+    return (
+      <Routes>
+        <Route path="/privacy"        element={<Privacy />} />
+        <Route path="/delete-account" element={<DeleteAccount />} />
+      </Routes>
+    )
   }
 
   // Password recovery mode: Supabase fires this when user clicks the reset email link
@@ -64,9 +70,10 @@ function AppShell() {
   if (!session) {
     return (
       <Routes>
-        <Route path="/login"   element={<Login />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="*"        element={<Navigate to="/login" replace />} />
+        <Route path="/login"          element={<Login />} />
+        <Route path="/privacy"        element={<Privacy />} />
+        <Route path="/delete-account" element={<DeleteAccount />} />
+        <Route path="*"               element={<Navigate to="/login" replace />} />
       </Routes>
     )
   }
@@ -91,6 +98,7 @@ function AppShell() {
         <Route path="/get-help"           element={<GetHelp />} />
         <Route path="/resources"          element={<Resources />} />
         <Route path="/privacy"            element={<Privacy />} />
+        <Route path="/delete-account"     element={<DeleteAccount />} />
         <Route path="/login"              element={<Navigate to="/" replace />} />
         <Route path="*"                   element={<Navigate to="/" replace />} />
       </Routes>
