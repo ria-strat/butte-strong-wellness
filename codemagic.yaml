@@ -14,6 +14,7 @@ workflows:
         APPLE_TEAM_ID: DJAXSSFY8H
         XCODE_PROJECT: ios/App/App.xcodeproj
         XCODE_SCHEME: App
+        APP_VERSION: 1.0.1
         VITE_SUPABASE_URL: https://cgnkqbyvlhqysbfilliz.supabase.co
         VITE_SUPABASE_ANON_KEY: sb_publishable_iW682eGGFoWK6VkQPpa73w_70zb9L1A
 
@@ -83,6 +84,7 @@ workflows:
       - name: Inject Info.plist privacy strings and build number
         script: |
           PLIST="ios/App/App/Info.plist"
+          plutil -replace CFBundleShortVersionString -string "$APP_VERSION" "$PLIST"
           # Use Codemagic's auto-incrementing build number so each upload is unique
           plutil -replace CFBundleVersion -string "$BUILD_NUMBER" "$PLIST"
           # Required privacy strings
