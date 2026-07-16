@@ -139,6 +139,11 @@ workflows:
         - buttestrong_keystore
       vars:
         PACKAGE_NAME: com.buttestrongwellness.app
+        # Vite inlines these at build time. Without them createClient() throws
+        # "supabaseUrl is required" at startup → blank screen. (Public URL +
+        # publishable anon key — safe to embed; matches the iOS workflow.)
+        VITE_SUPABASE_URL: https://cgnkqbyvlhqysbfilliz.supabase.co
+        VITE_SUPABASE_ANON_KEY: sb_publishable_iW682eGGFoWK6VkQPpa73w_70zb9L1A
 
     scripts:
       - name: Install npm dependencies
