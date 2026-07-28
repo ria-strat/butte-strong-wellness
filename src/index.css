@@ -23,10 +23,17 @@ html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
+  max-width: 100%;
   overflow-x: hidden;
   background-color: #F4F2EE;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* `clip` stops horizontal scroll more reliably than `hidden` on iOS Safari,
+   which can still rubber-band horizontally under `overflow-x: hidden`. */
+@supports (overflow: clip) {
+  html, body, #root { overflow-x: clip; }
 }
 
 /* Page content bottom padding — clears the bottom nav + iOS home indicator */
@@ -36,4 +43,7 @@ html, body, #root {
 
 body {
   font-family: 'DM Sans', system-ui, sans-serif;
+  /* Long emails / URLs in user-entered data wrap instead of forcing side-scroll.
+     overflow-wrap is inherited, so this applies to all text. */
+  overflow-wrap: break-word;
 }
