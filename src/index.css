@@ -47,3 +47,11 @@ body {
      overflow-wrap is inherited, so this applies to all text. */
   overflow-wrap: break-word;
 }
+
+/* iOS auto-zooms the whole page when a focused input's font-size is < 16px.
+   With a zoomable viewport that zoom can persist after blur, leaving the app
+   larger than the screen so users must scroll side-to-side. Forcing 16px on
+   touch devices prevents the zoom entirely (without disabling pinch-zoom). */
+@media (pointer: coarse) {
+  input, select, textarea { font-size: 16px !important; }
+}
