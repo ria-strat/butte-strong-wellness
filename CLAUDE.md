@@ -121,7 +121,7 @@ function useReveal(delay = 0) {
 ```
 
 **Page layout wrapper:** `<div className="flex flex-col min-h-[100dvh] bg-cream">`
-**Content area:** `px-4 pt-5 pb-24` (pb-24 = clears bottom nav)
+**Content area:** `px-4 pt-5 pb-nav` (pb-nav = custom utility: `calc(6rem + env(safe-area-inset-bottom))` — clears bottom nav + iOS home indicator on all devices)
 **Transitions:** always `cubic-bezier(0.32,0.72,0,1)` — never `ease-in-out` or `linear`
 
 ---
@@ -198,5 +198,5 @@ Photo uploads go to Supabase Storage `photos` bucket via `PhotoUpload` component
 
 ## Contact Info on File
 
-- Mandy Barrow (Family Engagement Specialist): (949) 338-4553 / mandyjoybarrow@yahoo.com
+- Mandy Barrow (Family Engagement Specialist): (949) 338-4553 / buttestrongwellness@gmail.com
 - All `@buttecounty.net` emails updated to `@buttecounty.ca.gov`

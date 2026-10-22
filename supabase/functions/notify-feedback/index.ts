@@ -6,7 +6,7 @@
 
 const NOTIFY_EMAILS = [
   'jdrysdale@buttecounty.ca.gov',
-  'mandyjoybarrow@yahoo.com',
+  'buttestrongwellness@gmail.com',
 ]
 
 Deno.serve(async (req) => {
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
         'Content-Type':  'application/json',
       },
       body: JSON.stringify({
-        from:    'Butte Strong Wellness <onboarding@resend.dev>',
+        from:    'Butte Strong Wellness <notifications@ria-strategies.com>',
         to:      NOTIFY_EMAILS,
         subject,
         text:    body,

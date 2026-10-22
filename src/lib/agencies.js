@@ -17,5 +17,6 @@ export const AGENCIES = [
   'Chico Fire Department (CFD)',
   'State Parks - Butte County',
   'Butte County EMS',
+  'University Police Department (UPD)',
   'Other / Prefer not to say',
 ]

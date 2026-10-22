@@ -59,7 +59,7 @@ insert into team_members (name, role, agency, email, phone, bio, accent, sort_or
 ('Jodi Drysdale', 'Wellness Unit Manager', 'BCSO', 'jdrysdale@buttecounty.net', '530-321-8429',
  'Jodi Drysdale has been the Wellness Unit Manager since 2021. Jodi has a Bachelor''s degree in Health Education and Community Service and previously spent six years working for the Butte County Dept. of Behavioral Health in the Community Services Division, Prevention Unit. For the past 15 years, Jodi has owned an event planning business volunteering her time planning events that honor and celebrate first responders — including the Camp Fire appreciation dinners and the Chico Firefighters Ball. In 2020, Jodi managed the Camp Fire Collaborative, coordinating partner agencies serving the long-term recovery of people affected by the Camp Fire.',
  '#C9A84C', 1),
-('Mandy Barrow', 'Family Engagement Specialist', null, 'mandyjoybarrow@yahoo.com', '(949) 338-4553',
+('Mandy Barrow', 'Family Engagement Specialist', null, 'buttestrongwellness@gmail.com', '(949) 338-4553',
  'Mandy Barrow is married to Detective Cory Barrow of Chico PD and they have 3 children. Mandy assists Jodi with Wellness Unit events, meetings, and monthly newsletters.',
  '#1A8A72', 2),
 ('Wes Metroka', 'Advisory Committee · Battalion Chief', 'CFD', 'wesley.metroka@chicoca.gov', '530-828-2141',
