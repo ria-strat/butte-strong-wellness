@@ -213,6 +213,26 @@ function SectionLabel({ label, delay }) {
 
 const ACCENT = '#C62828'
 
+// Agencies listed first, in this order; any others follow alphabetically.
+const AGENCY_ORDER = ['BCSO', 'CPD', 'PPD', 'CFD', 'CAL FIRE', 'BEMS', 'UPD', 'CSPD', 'BCPD']
+
+function groupByAgency(rows) {
+  const groups = new Map()
+  for (const r of rows) {
+    const key = (r.agency || '').trim() || 'Other'
+    const norm = key.toUpperCase()
+    if (!groups.has(norm)) groups.set(norm, { agency: key, members: [] })
+    groups.get(norm).members.push(r)
+  }
+  const rank = a => {
+    const i = AGENCY_ORDER.indexOf(a.toUpperCase())
+    return i === -1 ? AGENCY_ORDER.length : i
+  }
+  return [...groups.entries()]
+    .sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b))
+    .map(([, g]) => g)
+}
+
 export default function PeerSupport() {
   const headerRef = useReveal(0)
   const missionRef = useReveal(80)
@@ -301,11 +321,15 @@ export default function PeerSupport() {
           </div>
 
           {/* Peer Support Members */}
-          <SectionLabel label="Peer Support Members" delay={100} />
           {loading && Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
           {error && <ErrorState message="Unable to load peer support members. Please try again." />}
-          {!loading && !error && members.map((m, i) => (
-            <MemberCard key={m.id} member={m} accent={ACCENT} index={i} />
+          {!loading && !error && groupByAgency(members).map(g => (
+            <div key={g.agency} className="flex flex-col gap-3">
+              <SectionLabel label={`${g.agency} · ${g.members.length}`} delay={0} />
+              {g.members.map((m, i) => (
+                <MemberCard key={m.id} member={m} accent={ACCENT} index={i} />
+              ))}
+            </div>
           ))}
 
           {/* Chaplains */}
