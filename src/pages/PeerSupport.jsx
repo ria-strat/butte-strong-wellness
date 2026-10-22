@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
 import SkeletonCard from '../components/SkeletonCard'
 import ErrorState from '../components/ErrorState'
@@ -213,6 +213,39 @@ function SectionLabel({ label, delay }) {
 
 const ACCENT = '#C62828'
 
+const sectionId = agency => `agency-${agency.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+
+function JumpBar({ items }) {
+  const jump = id => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+  return (
+    <div
+      className="sticky top-0 z-20 -mx-4 px-4 py-2.5 bg-cream"
+      style={{ borderBottom: '1px solid rgba(11,31,74,0.07)', paddingTop: 'max(0.625rem, env(safe-area-inset-top))' }}
+    >
+      <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+        {items.map(it => (
+          <button
+            key={it.id}
+            onClick={() => jump(it.id)}
+            className="shrink-0 rounded-full px-3.5 font-sans text-[11px] font-semibold uppercase tracking-wide cursor-pointer"
+            style={{
+              minHeight: '36px',
+              backgroundColor: 'white',
+              color: it.color,
+              border: `1px solid ${it.color}40`,
+              boxShadow: '0 1px 6px rgba(11,31,74,0.06)',
+            }}
+          >
+            {it.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // Agencies listed first, in this order; any others follow alphabetically.
 const AGENCY_ORDER = ['BCSO', 'CPD', 'PPD', 'CFD', 'CAL FIRE', 'BEMS', 'UPD', 'CSPD', 'BCPD']
 
@@ -240,6 +273,12 @@ export default function PeerSupport() {
   const [chaplains, setChaplains] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  const groups = useMemo(() => groupByAgency(members), [members])
+  const jumpItems = [
+    ...groups.map(g => ({ id: sectionId(g.agency), label: g.agency, color: ACCENT })),
+    ...(chaplains.length ? [{ id: 'agency-chaplains', label: 'Chaplains', color: '#9A7B1F' }] : []),
+  ]
 
   useEffect(() => {
     async function fetchMembers() {
@@ -320,11 +359,14 @@ export default function PeerSupport() {
             </div>
           </div>
 
+          {/* Jump to agency */}
+          {!loading && !error && jumpItems.length > 1 && <JumpBar items={jumpItems} />}
+
           {/* Peer Support Members */}
           {loading && Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
           {error && <ErrorState message="Unable to load peer support members. Please try again." />}
-          {!loading && !error && groupByAgency(members).map(g => (
-            <div key={g.agency} className="flex flex-col gap-3">
+          {!loading && !error && groups.map(g => (
+            <div key={g.agency} id={sectionId(g.agency)} className="flex flex-col gap-3" style={{ scrollMarginTop: '64px' }}>
               <SectionLabel label={`${g.agency} · ${g.members.length}`} delay={0} />
               {g.members.map((m, i) => (
                 <MemberCard key={m.id} member={m} accent={ACCENT} index={i} />
@@ -334,12 +376,12 @@ export default function PeerSupport() {
 
           {/* Chaplains */}
           {!loading && !error && (
-            <>
+            <div id="agency-chaplains" className="flex flex-col gap-3" style={{ scrollMarginTop: '64px' }}>
               <SectionLabel label="Chaplains" delay={0} />
               {chaplains.map((m, i) => (
                 <MemberCard key={m.id} member={m} accent="#C9A84C" index={i} />
               ))}
-            </>
+            </div>
           )}
 
         </div>
